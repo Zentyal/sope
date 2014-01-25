@@ -26,7 +26,8 @@ ADDITIONAL_INCLUDE_DIRS += \
 	-I$(CORE_ROOT)		\
 	-I$(CORE_ROOT)/NGStreams/	\
 	-I$(CORE_ROOT)/NGExtensions	\
-	-I$(SOPE_ROOT)/sope-mime
+	-I$(SOPE_ROOT)/sope-mime        \
+	-I$(SOPE_ROOT)/sope-json/SBJson/Classes
 
 
 # library/framework search pathes

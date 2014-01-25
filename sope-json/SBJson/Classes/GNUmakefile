@@ -28,3 +28,11 @@ SBJson_OBJC_FILES = \
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/library.make
 -include GNUmakefile.postamble
+
+all:: SBJson_includes
+
+SBJson_includes:
+	@if [ ! -d SBJson ]; then mkdir SBJson; fi
+	@for header in  $(SBJson_HEADER_FILES); do \
+	    ( cd SBJson/; ln -sf ../$$header ./ ); \
+	done

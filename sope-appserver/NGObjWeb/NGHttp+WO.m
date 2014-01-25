@@ -20,11 +20,13 @@
   02111-1307, USA.
 */
 
+#include <Foundation/NSString.h>
 #include "NGHttp+WO.h"
 #include <NGHttp/NGHttp.h>
 #include <NGObjWeb/WOCookie.h>
 #include <NGObjWeb/WORequest.h>
 #include <NGMime/NGMime.h>
+#include <SBJson/SBJsonParser.h>
 #include "common.h"
 #include <string.h>
 
@@ -321,9 +323,10 @@ static Class NSArrayClass = Nil;
 /* form parameters */
 
 static NGMimeType *multipartFormData = nil;
+static NGMimeType *applicationJson = nil;
 static Class      DispClass = Nil;
 
-- (id)_decodeMultiPartFormDataContent {
+- (NGMutableHashMap *)_decodeMultiPartFormDataContent {
   NGMutableHashMap    *formContent;
   NGMimeMultipartBody *ebody;
   NSArray             *parts;
@@ -376,6 +379,18 @@ static Class      DispClass = Nil;
       [(NGMutableHashMap *)formContent addObject:partBody forKey:name];
   }
   return formContent;
+}
+
+- (NGMutableHashMap *)_decodeApplicationJsonContent {
+  SBJsonParser *parser = [SBJsonParser new];
+  [parser autorelease];
+
+  NSString *contentString = [[NSString alloc]
+                                initWithData: [self body]
+                                encoding: NSUTF8StringEncoding];
+  NSDictionary *jsonForm = [parser objectWithString: contentString];
+
+  return [[NGHashMap alloc] initWithDictionary: jsonForm];
 }
 
 - (NGHashMap *)_decodeFormContentURLParameters:(id)formContent {
@@ -445,21 +460,29 @@ static Class      DispClass = Nil;
 }
 
 - (NGHashMap *)formParameters {
-  id formContent;
+  NGHashMap *formContent;
   
   if (multipartFormData == nil)
     multipartFormData = [[NGMimeType mimeType:@"multipart/form-data"] retain];
-  
+  if (applicationJson == nil)
+      applicationJson = [[NGMimeType mimeType:@"application/json"] retain];
+
   if ([[self methodName] isEqualToString:@"POST"]) {
     NGMimeType *contentType = [self contentType];
-    
+
 #if 0
     NSLog(@"%s: process POST, ctype %@", __PRETTY_FUNCTION__, contentType);
 #endif
-    
-    formContent = [contentType hasSameType:multipartFormData]
-      ? [self _decodeMultiPartFormDataContent]
-      : [[self body] retain];
+
+    if ([contentType hasSameType:multipartFormData]) {
+        formContent = [self _decodeMultiPartFormDataContent];
+    }
+    else if ([contentType hasSameType:applicationJson]) {
+        formContent = [self _decodeApplicationJsonContent];
+    }
+    else {
+        formContent = [[self body] retain];
+    }
   }
   else
     formContent = nil;

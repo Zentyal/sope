@@ -15,9 +15,9 @@ SUBPROJECTS += \
 	sope-xml	\
 	sope-core	\
 	sope-mime	\
+	sope-json	\
 	sope-appserver	\
-	sope-gdl1 \
-	sope-json
+	sope-gdl1
 
 ifeq ($(HAS_LIBRARY_ldap),yes)
 SUBPROJECTS += sope-ldap
