@@ -21,6 +21,8 @@
 
 #include "WOInput.h"
 
+#include "WOJsonResponse.h"
+
 @interface WOHiddenField : WOInput
 {
   // WODynamicElement: extraAttributes
@@ -69,6 +71,31 @@
                                   [_ctx component]]);
   }
   WOResponse_AddEmptyCloseParens(_response, _ctx);
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableDictionary *attributes;
+
+  if ([_ctx isRenderingDisabled] || [[_ctx request] isFromClientComponent])
+    return;
+
+  attributes = [NSMutableDictionary new];
+  [attributes setObject: @"hidden" forKey: @"type"];
+  [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
+  NSString *v = [self->value stringValueInComponent:[_ctx component]];
+  if (v)
+      [attributes setObject: v forKey: @"value"];
+  if (self->disabled != nil) {
+      if ([self->disabled boolValueInComponent:[_ctx component]]) {
+          [attributes setObject: [NSNumber numberWithBool: YES]
+                      forKey: @"disabled"];
+      }
+  }
+
+  [self appendExtraAttributesToDictionary: attributes inContext:_ctx];
+  [_response appendInput: attributes];
+  [attributes release];
 }
 
 @end /* WOHiddenField */

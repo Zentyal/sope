@@ -29,6 +29,7 @@
 #include <NGObjWeb/WOResourceManager.h>
 #include <NGObjWeb/WOApplication.h>
 #include <NGObjWeb/WOResponse.h>
+#include "SoObjects/WORequest+So.h"
 #include "WOComponentFault.h"
 #include "common.h"
 #include <NGExtensions/NGBundleManager.h>
@@ -372,15 +373,19 @@ static inline id _getExtraVar(WOComponent *self, NSString *_key) {
 }
 - (NSString *)path {
   NSArray *languages = nil;
-  
+  BOOL useJson;
+
 #if 0 // the component might not yet be awake !
   languages = [[self context] resourceLookupLanguages];
 #endif
-  
+
+  useJson = [[[self context] request] isSoJSONRequest];
+
   return [[self resourceManager]
                 pathToComponentNamed:[self name]
                 inFramework:[self frameworkName]
-                languages:languages];
+                languages:languages
+                useJson:useJson];
 }
 - (void)setBaseURL:(NSURL *)_url {
   ASSIGNCOPY(self->wocBaseURL, _url);
@@ -681,6 +686,7 @@ static inline id _getExtraVar(WOComponent *self, NSString *_key) {
   WOResourceManager *resourceManager;
   NSArray           *languages;
   WOElement         *tmpl;
+  BOOL              useJson;
   
   if ((resourceManager = [self resourceManager]) == nil) {
     [self errorWithFormat:@"%s: could not determine resource manager !",
@@ -689,7 +695,9 @@ static inline id _getExtraVar(WOComponent *self, NSString *_key) {
   }
   
   languages = [[self context] resourceLookupLanguages];
-  tmpl      = [resourceManager templateWithName:_name languages:languages];
+  useJson = [[[self context] request] isSoJSONRequest];
+  tmpl      = [resourceManager templateWithName:_name languages:languages
+                               useJson: useJson];
 
   if (debugTemplates) [self debugWithFormat:@"found template: %@", tmpl];
   return tmpl;
@@ -931,6 +939,56 @@ static inline id _getExtraVar(WOComponent *self, NSString *_key) {
   }
   else
     [template appendToResponse:_response inContext:_ctx];
+
+  if (perfLogger) {
+    NSTimeInterval diff;
+    int i;
+    diff = [[NSDateClass date] timeIntervalSince1970] - st;
+#if 1
+    for (i = [_ctx componentStackCount]; i >= 0; i--)
+      printf("  ");
+#endif
+    [perfLogger logWithFormat:@"Template %@ (comp %@): %0.3fs\n",
+                  [_ctx elementID],
+                  [self name],
+                  diff];
+  }
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  WOElement *template = nil;
+  NSTimeInterval st = 0.0;
+  
+  NSAssert1(self->componentFlags.isAwake,
+            @"component %@ is not awake !", self);
+  if (debugOn) {
+    if (self->context != _ctx) {
+      [self debugWithFormat:@"%s: component ctx != ctx (%@ vs %@)",
+              __PRETTY_FUNCTION__, self->context, _ctx];
+    }
+  }
+  
+  [self _setContext:_ctx];
+  
+  if ((template = [self _woComponentTemplate]) == nil) {
+    if (debugOn) {
+      [self debugWithFormat:@"component has no template (rm=%@).",
+              [self resourceManager]];
+    }
+    return;
+  }
+  
+  if (perfLogger)
+    st = [[NSDateClass date] timeIntervalSince1970];
+    
+  if (template->appendJsonResponse) {
+    template->appendJsonResponse(template,
+                                 @selector(appendToJsonResponse:inContext:),
+                                 _response, _ctx);
+  }
+  else
+    [template appendToJsonResponse:_response inContext:_ctx];
 
   if (perfLogger) {
     NSTimeInterval diff;

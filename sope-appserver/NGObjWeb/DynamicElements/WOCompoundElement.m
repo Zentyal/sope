@@ -328,6 +328,134 @@ static int descriptiveIDs = -1;
 #endif
 }
 
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  void (*incId)(id, SEL);
+  unsigned short i;
+#if DEBUG
+  static int depth = 0;
+#if USE_EXCEPTION_HANDLER
+  static NSString *cName  = @"componentName";
+  static NSString *elemId = @"elementID";
+#endif
+  NSTimeInterval st = 0.0;
+  
+  if (NSDateClass == Nil)
+    NSDateClass = [NSDate class];
+
+  depth++;
+
+#if USE_EXCEPTION_HANDLER
+  NS_DURING {
+#endif
+
+    if (profElements)
+      st = [[NSDateClass date] timeIntervalSince1970];
+#endif
+    
+    incId = (void *)
+      [_ctx methodForSelector:@selector(incrementLastElementIDComponent)];
+    
+    if (descriptiveIDs)
+      [_ctx appendElementIDComponent:@"c0"];
+    else
+      [_ctx appendZeroElementIDComponent];
+    
+    for (i = 0; i < self->count; i++) {
+      register WOElement *child = self->children[i];
+#if DEBUG
+      NSAutoreleasePool *pool = nil;
+      NSTimeInterval st = 0.0;
+      if (embedInPool) pool = [[NSAutoreleasePool alloc] init];
+      if (profElements)
+        st = [[NSDateClass date] timeIntervalSince1970];
+#endif
+      
+      if (child->appendResponse) {
+        child->appendJsonResponse(child,
+                                  @selector(appendToJsonResponse:inContext:),
+                                  _response, _ctx);
+      }
+      else
+        [child appendToJsonResponse:_response inContext:_ctx];
+      
+#if DEBUG
+      if (profElements) {
+        NSTimeInterval diff;
+        int j;
+        diff = [[NSDateClass date] timeIntervalSince1970] - st;
+        if (diff > 0.0005) {
+#if 1
+          for (j = [_ctx componentStackCount] + depth; j >= 0; j--)
+            printf("  ");
+#endif
+          printf("  Child of 0x%p: i[%i] %s <%s>: %0.3fs\n",
+#if (defined(__GNU_LIBOBJC__) && (__GNU_LIBOBJC__ >= 20100911)) || defined(APPLE_RUNTIME) || defined(__GNUSTEP_RUNTIME__)
+				 self, i, [[_ctx elementID] cString], class_getName([child class]),
+#else
+                 self, i, [[_ctx elementID] cString], [child class]->name,
+#endif
+				 diff);
+        }
+      }
+      if (logId) {
+        NSLog(@"WOCompoundElement: pool will release ... (lastId=%@)",
+              [_ctx elementID]);
+      }
+      [pool release];
+#endif
+
+      if (descriptiveIDs) {
+        [_ctx deleteLastElementIDComponent];
+        [_ctx appendElementIDComponent:
+                [NSString stringWithFormat:@"c%i", i]];
+      }
+      else
+        incId(_ctx, @selector(incrementLastElementIDComponent));
+    }
+    [_ctx deleteLastElementIDComponent];
+
+#if DEBUG
+    if (profElements) {
+      NSTimeInterval diff;
+      int i;
+      diff = [[NSDateClass date] timeIntervalSince1970] - st;
+#if 1
+      for (i = [_ctx componentStackCount] + depth; i >= 0; i--)
+        printf("  ");
+#endif
+      printf("CompoundElem0x%p(#%i) %s (component=%s): %0.3fs\n",
+             self, self->count, [[_ctx elementID] cString],
+             [[(WOComponent *)[_ctx component] name] cString],
+             diff);
+    }
+
+#if USE_EXCEPTION_HANDLER
+  }
+  NS_HANDLER {
+    NSMutableDictionary *ui;
+    id tmp;
+    
+    ui = [[localException userInfo] mutableCopy];
+    if (ui == nil) ui = [[NSMutableDictionary alloc] init];
+    
+    if ((tmp = [ui objectForKey:cName]) == nil)
+      [ui setObject:[[_ctx component] name] forKey:cName];
+    if ((tmp = [ui objectForKey:elemId]) == nil)
+      [ui setObject:[_ctx elementID] forKey:elemId];
+
+    [localException setUserInfo:ui];
+    [ui release]; ui = nil;
+    
+    [localException raise];
+  }
+  NS_ENDHANDLER;
+#endif
+
+  depth--;
+#endif
+}
+
 /* description */
 
 - (NSString *)associationDescription {

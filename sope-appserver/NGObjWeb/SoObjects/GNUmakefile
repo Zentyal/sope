@@ -17,6 +17,7 @@ SoObjects_HEADER_FILES = \
 	SoClassSecurityInfo.h		\
 	SoDefaultRenderer.h		\
 	SoHTTPAuthenticator.h		\
+	SoJsonRenderer.h		\
 	SoObjCClass.h			\
 	SoObject.h			\
 	SoObjectMethodDispatcher.h	\
@@ -74,6 +75,7 @@ SoObjects_OBJC_FILES = \
 	WOComponent+SoObjects.m		\
 	WODirectActionRequestHandler+SoObjects.m\
 	WORequest+So.m			\
+	SoJsonRenderer.m		\
 	SoTemplateRenderer.m		\
 	SoSubContext.m			\
 	SoSecurityException.m		\

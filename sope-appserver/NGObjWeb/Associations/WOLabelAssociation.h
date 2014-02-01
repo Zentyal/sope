@@ -60,6 +60,9 @@
 
 - (id)initWithString:(NSString *)_str;
 
+- (NSString *) key;
+- (NSString *) defaultValue;
+
 /* value */
 
 - (BOOL)isValueConstant; // returns NO

@@ -77,6 +77,7 @@ libNGObjWeb_HEADER_FILES = \
 	WOPageGenerationContext.h	\
 	WOElementTrackingContext.h	\
 	WOComponentDefinition.h		\
+	WOJsonComponentDefinition.h	\
 	NSString+JavaScriptEscaping.h	\
 	WOHTMLDynamicElement.h		\
 	WOActionURL.h			\
@@ -89,9 +90,11 @@ NGObjWebCore_OBJC_FILES = \
 	WOComponent.m			\
 	WOComponent+Sync.m		\
 	WOComponentDefinition.m		\
+	WOJsonComponentDefinition.m	\
 	WOComponentFault.m		\
 	WOContext.m			\
 	WOElement.m			\
+	WOJsonResponse.m		\
 	WOMessage.m			\
 	WORequest.m			\
 	WOResourceManager.m		\
@@ -175,6 +178,15 @@ wod_OBJC_FILES  += wod.m $(NGObjWebCore_OBJC_FILES)
 wod_SUBPROJECTS = Templates Associations
 
 
+# ----- NGObjWeb text tools
+
+TEST_TOOL_NAME = testloadjson
+
+testloadjson_OBJC_FILES  = testload.m
+testloadjson_SUBPROJECTS = Templates Associations
+testloadjson_TOOL_LIBS += $(sope-json-libs) $(sope-core-libs) $(sope-xml-libs) $(sope-ngobjweb-libs)
+
+
 # building
 
 -include GNUmakefile.preamble
@@ -188,4 +200,5 @@ include $(GNUSTEP_MAKEFILES)/framework.make
 endif
 include $(GNUSTEP_MAKEFILES)/bundle.make
 include $(GNUSTEP_MAKEFILES)/tool.make
+include $(GNUSTEP_MAKEFILES)/test-tool.make
 -include GNUmakefile.postamble

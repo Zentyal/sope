@@ -57,18 +57,21 @@ sope-xml-libs  = -lDOM -lSaxObjC
 sope-core-libs = -lNGStreams -lNGExtensions -lEOControl
 sope-mime-libs = -lNGMime
 sope-ngobjweb-libs = -lNGObjWeb
+sope-json-libs = -lSBJson
 else
 sope-xml-libs  = -framework DOM -framework SaxObjC
 sope-core-libs = \
   -framework NGStreams -framework NGExtensions -framework EOControl
 sope-mime-libs = -framework NGMime -framework NGMail
 sope-ngobjweb-libs = -framework NGObjWeb 
+sope-json-libs = -lSBJson
 endif
 
 libNGObjWeb_LIBRARIES_DEPEND_UPON += \
 	$(sope-mime-libs) \
 	$(sope-core-libs) \
 	$(sope-xml-libs) \
+	$(sope-json-libs) \
 	$(BASE_LIBS)
 
 NGObjWeb_LIBRARIES_DEPEND_UPON += \
@@ -83,6 +86,7 @@ wod_TOOL_LIBS += \
 	$(sope-ngobjweb-libs)	\
 	$(sope-mime-libs)	\
 	$(sope-core-libs)	\
+	$(sope-json-libs) \
 	$(sope-xml-libs)
 wod_INSTALL_DIR = $(SOPE_TOOLS)
 SoCore_BUNDLE_LIBS += \

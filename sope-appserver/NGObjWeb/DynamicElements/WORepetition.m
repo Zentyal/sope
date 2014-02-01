@@ -24,6 +24,14 @@
 #include <NGExtensions/NSString+misc.h>
 #include "decommon.h"
 
+#include "Associations/WOKeyPathAssociation.h"
+#include "Associations/WOValueAssociation.h"
+#include "WOJsonResponse.h"
+
+
+static Class WOKeyPathAssociationK;
+static Class WOValueAssociationK;
+
 @interface WORepetition : WODynamicElement
 {
   // WODynamicElement: extraAttributes
@@ -145,6 +153,8 @@ static inline Class _classForConfig(NSDictionary *_config) {
     
     if (debugTakeValues) NSLog(@"WORepetition: WODebugTakeValues on.");
   }
+  WOValueAssociationK = [WOValueAssociation class];
+  WOKeyPathAssociationK = [WOKeyPathAssociation class];
 }
 
 + (id)allocWithZone:(NSZone *)zone {
@@ -583,6 +593,109 @@ _applyIndex(_WOComplexRepetition *self, WOComponent *sComponent, unsigned _idx)
 #endif
 }
 
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableArray *subResponses;
+  WOJsonResponse *subResponse;
+  WOComponent *sComponent;
+  NSArray *array;
+  NSString *key;
+  unsigned aCount, goCount, startIdx;
+
+  sComponent = [_ctx component];
+  array      = [[self->list valueInContext:_ctx] retain];
+  aCount     = [array count];
+  startIdx   = [self->startIndex unsignedIntValueInComponent:sComponent];
+
+  subResponses = [[NSMutableArray alloc] initWithCapacity: aCount];
+  if ([self->list isKindOfClass: WOKeyPathAssociationK])
+      key = [(WOKeyPathAssociation *) self->list keyPath];
+  else if ([self->list isKindOfClass: WOValueAssociationK])
+      key = [self->list stringValue];
+  else {
+      [NSException raise: @"JSONException"
+                   format: @"unsupported class for list name"];
+      key = nil;
+  }
+  [_response appendLoopWithKey: key andSubResponses: subResponses];
+  [subResponses release];
+
+  goCount    = self->count
+    ? [self->count unsignedIntValueInComponent:sComponent]
+    : aCount;
+
+  if (goCount > 0) {
+    unsigned cnt, goUntil;
+
+    if (self->identifier == nil) {
+      if (startIdx == 0)
+        [_ctx appendZeroElementIDComponent];
+      else
+        [_ctx appendIntElementIDComponent:startIdx];
+    }
+
+    if (self->list) {
+      goUntil = (aCount > (startIdx + goCount))
+        ? startIdx + goCount
+        : aCount;
+    }
+    else
+      goUntil = startIdx + goCount;
+
+    for (cnt = startIdx; cnt < goUntil; cnt++) {
+      id ident = nil;
+      id lItem;
+
+      subResponse = [WOJsonResponse new];
+      [subResponses addObject: subResponse];
+      [subResponse release];
+
+      if (self->index)
+        [self->index setUnsignedIntValue:cnt inComponent:sComponent];
+
+      lItem = [array objectAtIndex:cnt];
+
+      if (self->item) {
+        [self->item setValue:lItem inComponent:sComponent];
+      }
+      else {
+        if (!self->index && self->list) {
+          [_ctx pushCursor:lItem];
+        }
+      }
+
+      /* get identifier used for action-links */
+
+      if (self->identifier) {
+        /* use a unique id for subelement detection */
+        ident = [self->identifier stringValueInComponent:sComponent];
+        ident = [ident stringByEscapingURL];
+        [_ctx appendElementIDComponent:ident];
+      }
+
+      /* append child elements */
+      [self->template appendToJsonResponse:subResponse inContext:_ctx];
+
+      /* cleanup */
+
+      if (self->identifier)
+        [_ctx deleteLastElementIDComponent];
+      else
+        [_ctx incrementLastElementIDComponent];
+    }
+
+    if (self->identifier == nil)
+      [_ctx deleteLastElementIDComponent]; /* repetition index */
+
+    if (!self->item && !self->index &&self->list)
+      [_ctx popCursor];
+
+    //if (self->index) [self->index setUnsignedIntValue:0];
+    //if (self->item)  [self->item  setValue:nil];
+  }
+  [array release];
+}
+
 /* description */
 
 - (NSString *)associationDescription {
@@ -841,6 +954,65 @@ _sapplyIndex(_WOSimpleRepetition *self, WOComponent *sComponent, NSArray *array,
   if (descriptiveIDs)
     [_ctx deleteLastElementIDComponent];
 #endif
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableArray *subResponses;
+  WOJsonResponse *subResponse;
+  WOComponent *sComponent;
+  NSArray *array;
+  unsigned aCount;
+  NSString *key;
+
+  sComponent = [_ctx component];
+  array      = [[self->list valueInContext:_ctx] retain];
+  aCount     = [array count];
+
+  if (aCount > 0) {
+    unsigned cnt;
+
+    subResponses = [[NSMutableArray alloc] initWithCapacity: aCount];
+    if ([self->list isKindOfClass: WOKeyPathAssociationK])
+        key = [(WOKeyPathAssociation *) self->list keyPath];
+    else if ([self->list isKindOfClass: WOValueAssociationK])
+        key = [self->list stringValue];
+    else {
+        [NSException raise: @"JSONException"
+                     format: @"unsupported class for list name"];
+        key = nil;
+    }
+    [_response appendLoopWithKey: key andSubResponses: subResponses];
+    [subResponses release];
+
+    [_ctx appendZeroElementIDComponent];
+    for (cnt = 0; cnt < aCount; cnt++) {
+      subResponse = [WOJsonResponse new];
+      [subResponses addObject: subResponse];
+      [subResponse release];
+
+      if (self->item) {
+        [self->item setValue:[array objectAtIndex:cnt]
+                    inComponent:sComponent];
+      }
+      else {
+        [_ctx pushCursor:[array objectAtIndex:cnt]];
+      }
+
+      /* append child elements */
+      [self->template appendToJsonResponse:subResponse inContext:_ctx];
+
+      /* cleanup */
+      [self->item setValue:nil inComponent:sComponent];
+      [_ctx incrementLastElementIDComponent];
+      if (self->item == nil)
+        [_ctx popCursor];
+    }
+
+    [_ctx deleteLastElementIDComponent]; /* repetition index */
+    //if (self->item)  [self->item  setValue:nil];
+  }
+  [array release];
 }
 
 /* description */

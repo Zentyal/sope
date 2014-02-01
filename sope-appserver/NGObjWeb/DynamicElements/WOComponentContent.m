@@ -184,4 +184,50 @@ static Class NSDateClass = Nil;
   }
 }
 
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  WOElement *content;
+  
+  content = [_ctx componentContent]; // content (valid in parent)
+  
+  if (content) {
+    NSTimeInterval st = 0.0;
+    WOComponent *component;
+    
+    component = [_ctx component]; // reusable component
+    component = [component retain];
+    content   = [content   retain];
+
+    if (profileComponents)
+      st = [[NSDateClass date] timeIntervalSince1970];
+    
+    [_ctx leaveComponent:component];
+    [content appendToJsonResponse:_response inContext:_ctx];
+    [_ctx enterComponent:component content:content];
+    
+    if (profileComponents) {
+      NSTimeInterval diff;
+      int i;
+      diff = [[NSDateClass date] timeIntervalSince1970] - st;
+      for (i = [_ctx componentStackCount]; i >= 0; i--)
+        printf("  ");
+      printf("content: [%s %s]: %0.3fs\n",
+             [[component name] cString], 
+#if (defined(__GNU_LIBOBJC__) && (__GNU_LIBOBJC__ >= 20100911)) || defined(APPLE_RUNTIME) || defined(__GNUSTEP_RUNTIME__)
+	     sel_getName(_cmd), 
+#else
+	     sel_get_name(_cmd), 
+#endif
+	     diff);
+    }
+    
+    [content   release];
+    [component release];
+  }
+  else {
+    [self logWithFormat: @" Missing content in component: %@",
+          [[_ctx component] description]];
+  }
+}
+
 @end /* WOComponentContent */

@@ -62,6 +62,8 @@ DynamicElements_OBJC_FILES = \
 	\
 	WONoContentElement.m	\
 	_WOStaticHTMLElement.m	\
+	\
+	WOJsonCondition.m
 
 DynamicElements_OBJC_FILES += \
 	_WOConstResourceImage.m	\

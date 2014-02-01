@@ -405,9 +405,9 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
 }
 
 - (BOOL)shouldLookupResourceInWebServerResources:(NSString *)_name {
-  if ([_name hasSuffix:@".wox"]) return NO;
-  if ([_name hasSuffix:@".wo"])  return NO;
-  return YES;
+  return !([_name hasSuffix: @".json"]
+          || [_name hasSuffix: @".wox"]
+           || [_name hasSuffix: @".wo"]);
 }
 
 - (NSString *)_wePathForResourceNamed:(NSString *)_name
@@ -429,7 +429,7 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
 
 - (BOOL)isTemplateResourceName:(NSString *)_name {
   // TODO: non-extensible
-  return [_name hasSuffix:@".wox"];
+  return [_name hasSuffix:@".wox"] || [_name hasSuffix:@".json"];
 }
 
 - (NSString *)pathForResourceNamed:(NSString *)_name
@@ -459,7 +459,8 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
     if (debugOn) [self debugWithFormat:@"  is template resource .."];
     return [self pathToComponentNamed:[_name stringByDeletingPathExtension]
 		 inFramework:_fwName
-		 languages:_langs];
+		 languages:_langs
+                 useJson:[_name hasSuffix: @"json"]];
   }
   
   /* check languages */
@@ -716,6 +717,7 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
 
 - (NSString *)lookupComponentInStandardPathes:(NSString *)_name
   inFramework:(NSString *)_framework theme:(NSString *)_theme
+  useJson:(BOOL)_useJson
 {
   // TODO: what about languages/themes?!
   NSEnumerator *e;
@@ -751,7 +753,12 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
     
     path = [path stringByAppendingPathComponent:_name];
     
-    pe = [path stringByAppendingPathExtension:@"wox"];
+    if (_useJson) {
+        pe = [path stringByAppendingPathExtension:@"json"];
+    }
+    else {
+        pe = [path stringByAppendingPathExtension:@"wox"];
+    }
     if (debugComponents) [self logWithFormat:@"CHECK %@", pe];
     
     if ([fm fileExistsAtPath:pe])
@@ -772,6 +779,7 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
 }
 - (NSString *)lookupComponentInStandardPathes:(NSString *)_name
   inFramework:(NSString *)_framework languages:(NSArray *)_langs
+  useJson:(BOOL)_useJson
 {
   NSString *path;
   NSString *theme;
@@ -800,7 +808,7 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
   
   if (theme != nil) {
     path = [self lookupComponentInStandardPathes:_name inFramework:_framework
-		 theme:theme];
+		 theme:theme useJson:_useJson];
     if (path != nil)
       return path;
   }
@@ -808,7 +816,7 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
   /* check base dirs */
   
   path = [self lookupComponentInStandardPathes:_name inFramework:_framework
-	       theme:nil];
+	       theme:nil useJson:_useJson];
   if (path != nil)
     return path;
   
@@ -816,7 +824,7 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
 
   if ([_framework isNotEmpty]) {
     path = [self lookupComponentInStandardPathes:_name inFramework:nil
-		 theme:nil];
+		 theme:nil useJson:_useJson];
     if (path != nil)
       return path;
   }
@@ -866,7 +874,9 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
 }
 
 - (NSString *)pathToComponentNamed:(NSString *)_name
-  inFramework:(NSString *)_fw languages:(NSArray *)_langs
+                       inFramework:(NSString *)_fw
+                         languages:(NSArray *)_langs
+                           useJson:(BOOL)_useJson
 {
   // TODO: what about languages in lookup?
   NSString *path;
@@ -890,7 +900,7 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
   /* look in FHS locations */
 
   path = [self lookupComponentInStandardPathes:_name inFramework:_fw
-	       languages:_langs];
+	       languages:_langs useJson:_useJson];
   if (path != nil) {
     if (debugComponents)
       [self logWithFormat:@"  found in standard pathes: %@", path];
@@ -901,7 +911,8 @@ checkCache(NSDictionary *_cache, WEResourceKey *_key,
   
   if (debugComponents)
     [self logWithFormat:@"lookup component using WOResourceManager ..."];
-  path = [super pathToComponentNamed:_name inFramework:_fw languages:_langs];
+  path = [super pathToComponentNamed:_name inFramework:_fw languages:_langs
+                useJson:_useJson];
   if (path != nil) {
     if (debugComponents)
       [self logWithFormat:@"  found using WOResourceManager: %@", path];

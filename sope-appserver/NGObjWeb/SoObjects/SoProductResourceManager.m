@@ -314,15 +314,17 @@ static BOOL debugOn = NO;
 - (NSString *)pathToComponentNamed:(NSString *)_name
   inFramework:(NSString *)_fwname
   languages:(NSArray *)_langs
+  useJson:(BOOL)_useJson
 {
   NSString *p;
   
-  p = [super pathToComponentNamed:_name inFramework:_fwname languages:_langs];
+  p = [super pathToComponentNamed:_name inFramework:_fwname languages:_langs useJson:_useJson];
   if (![p isNotNull] || [p length] == 0 ) {
     [self logWithFormat:@"LOOKUP FAILED: %@", _name];
     p = [[self fallbackResourceManager] pathToComponentNamed:_name
 					inFramework:_fwname
-					languages:_langs];
+					languages:_langs
+                                        useJson:_useJson];
     [self logWithFormat:@"  PARENT (%@) SAID: %@", 
             [self fallbackResourceManager], p];
   }
@@ -331,6 +333,7 @@ static BOOL debugOn = NO;
 
 - (WOElement *)templateWithName:(NSString *)_name
   languages:(NSArray *)_languages
+  useJson:(BOOL)_useJson
 {
   WOResourceManager *arm;
   WOElement *e;
@@ -339,7 +342,8 @@ static BOOL debugOn = NO;
     [self logWithFormat:@"lookup template with name '%@' (languages=%@)",
 	  _name, [_languages componentsJoinedByString:@","]];
   }
-  if ((e = [super templateWithName:_name languages:_languages]) != nil) {
+  if ((e = [super templateWithName:_name languages:_languages useJson:_useJson])
+      != nil) {
     if (debugOn) [self logWithFormat:@"  found: %@", e];
     return e;
   }
@@ -348,7 +352,8 @@ static BOOL debugOn = NO;
   if (arm == self) return nil;
   
   if (debugOn) [self logWithFormat:@"  lookup in parent RM: %@", arm];
-  if ((e = [arm templateWithName:_name languages:_languages]) != nil) {
+  if ((e = [arm templateWithName:_name languages:_languages useJson:_useJson])
+      != nil) {
     if (debugOn) [self logWithFormat:@"  found: %@", e];
     return e;
   }

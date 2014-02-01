@@ -34,6 +34,7 @@
   // cached selectors
   OWTakeValuesMethod     takeValues;
   OWAppendResponseMethod appendResponse;
+  OWAppendJsonResponseMethod appendJsonResponse;
 }
 
 NGObjWeb_DECLARE id OWGetProperty(NSDictionary *_set, NSString *_name);

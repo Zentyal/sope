@@ -21,6 +21,7 @@
 
 #include <NGObjWeb/WOResourceManager.h>
 #include <NGObjWeb/WOComponentDefinition.h>
+#include <NGObjWeb/WOJsonComponentDefinition.h>
 #include "WOComponent+private.h"
 #include <NGObjWeb/WORequest.h>
 #include <NGObjWeb/WOApplication.h>
@@ -86,6 +87,8 @@ static BOOL     debugOn                 = NO;
 static BOOL     debugComponentLookup    = NO;
 static BOOL     debugResourceLookup     = NO;
 static BOOL     genMissingResourceLinks = NO;
+static NSNumber *yesNbr                 = nil;
+static NSNumber *noNbr                  = nil;
 
 + (void)initialize {
   NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
@@ -108,6 +111,15 @@ static BOOL     genMissingResourceLinks = NO;
   genMissingResourceLinks = [ud boolForKey:@"WOGenerateMissingResourceLinks"];
   rapidTurnAroundPath     = [[ud stringForKey:@"WOProjectDirectory"]  copy];
   suffix                  = [[ud stringForKey:@"WOApplicationSuffix"] copy];
+
+  if (!yesNbr) {
+      yesNbr = [NSNumber numberWithBool: YES];
+      [yesNbr retain];
+  }
+  if (!noNbr) {
+      noNbr = [NSNumber numberWithBool: NO];
+      [noNbr retain];
+  }
 }
 
 static inline BOOL
@@ -606,7 +618,8 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
 /* component definitions */
 
 - (NSString *)pathToComponentNamed:(NSString *)_name
-  inFramework:(NSString *)_framework
+                       inFramework:(NSString *)_framework
+                           useJson:(BOOL)_useJson
 {
   /* search for component wrapper .. */
   // TODO: shouldn't we used that for WOx as well?
@@ -644,8 +657,9 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
 - (NSString *)pathToComponentNamed:(NSString *)_name
   inFramework:(NSString *)_framework
   languages:(NSArray *)_langs
+                           useJson:(BOOL)_useJson
 {
-  return [self pathToComponentNamed:_name inFramework:_framework];
+  return [self pathToComponentNamed:_name inFramework:_framework useJson:_useJson];
 }
 
 - (WOComponentDefinition *)_definitionForPathlessComponent:(NSString *)_name
@@ -667,24 +681,30 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
   url:(NSURL *)_url
   baseURL:(NSURL *)_baseURL
   frameworkName:(NSString *)_fwname
+  useJson:(BOOL)_useJson
 {
   /* definition factory */
-  static Class DefClass;
+  static Class DefClass, JsonDefClass;
+  Class compClass;
   id cdef;
   
   if (DefClass == Nil)
     DefClass = [WOComponentDefinition class];
+  if (JsonDefClass == Nil)
+    JsonDefClass = [WOJsonComponentDefinition class];
 
+  compClass = _useJson ? JsonDefClass : DefClass;
   // TODO: is retained response intended?
-  cdef = [[DefClass alloc] initWithName:_name
-                           path:[_url path]
-                           baseURL:_baseURL frameworkName:_fwname];
+  cdef = [[compClass alloc] initWithName:_name
+                            path:[_url path]
+                            baseURL:_baseURL frameworkName:_fwname];
   return cdef;
 }
 - (WOComponentDefinition *)_definitionWithName:(NSString *)_name
   path:(NSString *)_path
   baseURL:(NSURL *)_baseURL
   frameworkName:(NSString *)_fwname
+  useJson:(BOOL)_useJson
 {
   NSURL *url;
   
@@ -693,21 +713,25 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
     : nil;
   
   return [self _definitionWithName:_name url:url
-               baseURL:_baseURL frameworkName:_fwname];
+               baseURL:_baseURL frameworkName:_fwname
+               useJson:_useJson];
 }
 
 - (WOComponentDefinition *)_cachedDefinitionForComponent:(id)_name
   languages:(NSArray *)_languages
+  useJson:(BOOL)_useJson
 {
   NSArray *cacheKey;
   id      cdef;
+  NSNumber * useJsonNbr;
 
   if (self->componentDefinitions == NULL)
     return nil;
   if (![[WOApplication application] isCachingEnabled])
     return nil;
-  
-  cacheKey = [NSArray arrayWithObjects:_name, _languages, nil];
+
+  useJsonNbr = _useJson ? yesNbr : noNbr;
+  cacheKey = [NSArray arrayWithObjects:_name, _languages, useJsonNbr, nil];
   cdef     = NSMapGet(self->componentDefinitions, cacheKey);
   
   return cdef;
@@ -715,18 +739,25 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
 - (WOComponentDefinition *)_cacheDefinition:(id)_cdef
   forComponent:(id)_name
   languages:(NSArray *)_languages
+  useJson:(BOOL)_useJson
 {
   NSArray *cacheKey;
+  NSNumber * useJsonNbr;
 
   if (self->componentDefinitions == NULL)
     return _cdef;
   if (![[WOApplication application] isCachingEnabled])
     return _cdef;
   
-  cacheKey = [NSArray arrayWithObjects:_name, _languages, nil];
+  useJsonNbr = _useJson ? yesNbr : noNbr;
+  cacheKey = [NSArray arrayWithObjects:_name, _languages, useJsonNbr, nil];
   NSMapInsert(self->componentDefinitions, cacheKey, _cdef ? _cdef : (id)null);
 
   return _cdef;
+}
+
+- (NSString *)jsonResourceNameForComponentNamed:(NSString *)_name {
+  return [NSString stringWithFormat: @"%@.json", _name];
 }
 
 - (NSString *)resourceNameForComponentNamed:(NSString *)_name {
@@ -738,8 +769,9 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
 - (void)_getComponentURL:(NSURL **)url_ andName:(NSString **)name_
   forNameOrURL:(id)_nameOrURL inFramework:(NSString *)_framework
   languages:(NSArray *)_languages
+  useJson:(BOOL)_useJson
 {
-  NSString *path;
+  NSString *path = nil;
   
   if ([_nameOrURL isKindOfClass:UrlClass]) {
     // TODO: where is this used currently? It probably was required for forms,
@@ -776,24 +808,33 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
 	    _nameOrURL, _framework];
   }
 
-  /* look for .wox component */
-    
-  path = [self pathForResourceNamed:
-		 [self resourceNameForComponentNamed:*name_]
-	       inFramework:_framework
-	       languages:_languages];
-    
-  if (debugComponentLookup)
-    [self logWithFormat:@"  .wox path: '%@'", path];
-    
-  /* look for .wo component */
-    
-  if ([path length] == 0) {
-    path = [self pathToComponentNamed:*name_
-		 inFramework:_framework
-		 languages:_languages];
+  if (_useJson) {
+    path = [self pathForResourceNamed:
+                     [self jsonResourceNameForComponentNamed:*name_]
+                 inFramework:_framework
+                 languages:_languages];
     if (debugComponentLookup)
-      [self logWithFormat:@"  .wo  path: '%@'", path];
+        [self logWithFormat:@"  .json path: '%@'", path];
+  }
+  else {
+    /* look for .wox component */
+    path = [self pathForResourceNamed:
+                     [self resourceNameForComponentNamed:*name_]
+                 inFramework:_framework
+                 languages:_languages];
+    if (debugComponentLookup)
+      [self logWithFormat:@"  .wox path: '%@'", path];
+    
+      /* look for .wo component */
+    
+    if ([path length] == 0) {
+      path = [self pathToComponentNamed:*name_
+                   inFramework:_framework
+                   languages:_languages
+                   useJson:_useJson];
+      if (debugComponentLookup)
+        [self logWithFormat:@"  .wo  path: '%@'", path];
+    }
   }
     
   /* make URL from path */
@@ -806,6 +847,7 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
 - (WOComponentDefinition *)definitionForFileURL:(NSURL *)componentURL
   componentName:(NSString *)_name inFramework:(NSString *)_framework
   languages:(NSArray *)_languages
+  useJson:(BOOL)_useJson
 {
   NSFileManager *fm;
   NSString      *componentPath;
@@ -886,7 +928,8 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
     cdef = [self _definitionWithName:_name
                        path:languagePath
                        baseURL:[NSURL URLWithString:baseUrl]
-                       frameworkName:nil];
+                       frameworkName:nil
+                       useJson:_useJson];
     if (cdef == nil) {
             [self warnWithFormat:
                     @"(%s): could not load component definition of "
@@ -917,6 +960,7 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
 - (WOComponentDefinition *)definitionForComponent:(id)_name
   inFramework:(NSString *)_framework
   languages:(NSArray *)_languages
+  useJson:(BOOL)_useJson
 {
   // TODO: this method is definitely too big! => refacture
   WOApplication         *app;
@@ -932,7 +976,7 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
   
   // TODO: Explain why _framework and _languages are NOT passed!
   [self _getComponentURL:&componentURL andName:&_name 
-	forNameOrURL:_name inFramework:nil languages:nil];
+	forNameOrURL:_name inFramework:nil languages:nil useJson:_useJson];
   
   if (debugComponentLookup) {
     [self logWithFormat:@"  component='%@' in framework='%@': url='%@'", 
@@ -957,7 +1001,8 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
     WOComponentDefinition *cdef;
 
     cdef = [self definitionForFileURL:componentURL componentName:_name
-		 inFramework:_framework languages:_languages];
+		 inFramework:_framework languages:_languages
+                 useJson:_useJson];
     if (cdef != nil && ![cdef isNotNull])
       return nil;
     else if (cdef != nil) 
@@ -987,7 +1032,8 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
     cdef = [self _definitionWithName:_name
                  url:componentURL
                  baseURL:[NSURL URLWithString:baseUrl]
-                 frameworkName:nil];
+                 frameworkName:nil
+                 useJson:_useJson];
     if (cdef == nil) {
       [self warnWithFormat:
               @"(%s): could not load component definition of '%@' from "
@@ -1015,15 +1061,10 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
   /* did not find component */
   return nil;
 }
-- (WOComponentDefinition *)definitionForComponent:(id)_name
-  languages:(NSArray *)_langs
-{
-  // TODO: who uses that? Probably should be deprecated?
-  return [self definitionForComponent:_name inFramework:nil languages:_langs];
-}
 
 - (WOComponentDefinition *)__definitionForComponent:(id)_name
   languages:(NSArray *)_languages
+  useJson: (BOOL)_useJson
 {
   /* 
      First check whether the cdef is cached, otherwise create a new one.
@@ -1036,7 +1077,8 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
   
   /* look into cache */
   
-  cdef = [self _cachedDefinitionForComponent:_name languages:_languages];
+  cdef = [self _cachedDefinitionForComponent:_name languages:_languages
+               useJson:_useJson];
   if (cdef != nil) {
     if (cdef == (id)null)
       /* component does not exist */
@@ -1049,26 +1091,34 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
   
   /* not cached, create a definition */
   
-  cdef = [self definitionForComponent:_name languages:_languages];
+  cdef = [self definitionForComponent:_name inFramework: nil
+               languages:_languages
+               useJson:_useJson];
 
   /* cache created definition */
   
-  return [self _cacheDefinition:cdef forComponent:_name languages:_languages];
+  return [self _cacheDefinition:cdef forComponent:_name
+               languages:_languages
+               useJson:_useJson];
 }
 
 - (WOElement *)templateWithName:(NSString *)_name
   languages:(NSArray *)_languages
+  useJson:(BOOL) useJson
 {
   WOComponentDefinition *cdef;
   
-  cdef = [self __definitionForComponent:_name languages:_languages];
+  cdef = [self __definitionForComponent:_name languages:_languages useJson: useJson];
   if (cdef == nil)
     return nil;
   
   return (WOElement *)[cdef template];
 }
 
-- (id)pageWithName:(NSString *)_name languages:(NSArray *)_langs {
+- (id) _pageWithName:(NSString *)_name
+           languages:(NSArray *)_langs
+             useJson:(BOOL)_useJson
+{
   /* 
      TODO: this appears to be deprecated since the WOComponent initializer
            is now -initWithContext: and we have no context over here ...
@@ -1079,7 +1129,8 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
   
   pool = [[NSAutoreleasePool alloc] init];
   {
-    cdef = [self __definitionForComponent:_name languages:_langs];
+    cdef = [self __definitionForComponent:_name languages:_langs
+                 useJson:_useJson];
     if (cdef != nil) {
       // TODO: document what the resource manager is used for in the cdef
       component =
@@ -1089,6 +1140,18 @@ _pathExists(WOResourceManager *self, NSFileManager *fm, NSString *path)
   [pool release];
   
   return [component autorelease];
+}
+
+- (id) pageWithName:(NSString *)_name
+          languages:(NSArray *)_langs
+{
+  return [self _pageWithName: _name languages: _langs useJson: NO];
+}
+
+- (id) jsonPageWithName: (NSString *)_name
+              languages: (NSArray *)_langs
+{
+  return [self _pageWithName: _name languages: _langs useJson: YES];
 }
 
 /* KeyedData */

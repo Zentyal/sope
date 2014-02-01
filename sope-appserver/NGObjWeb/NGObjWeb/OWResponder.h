@@ -24,7 +24,9 @@
 
 #import <Foundation/NSObject.h>
 
+@class NSMutableDictionary;
 @class WORequest, WOResponse, WOContext;
+@class WOJsonResponse;
 
 @protocol OWResponder < NSObject >
 
@@ -37,10 +39,16 @@
 - (void)appendToResponse:(WOResponse *)_response
   inContext:(WOContext *)_context;
 
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+  inContext:(WOContext *)_context;
+
 @end
 
 typedef void (*OWTakeValuesMethod)    (id, SEL, WORequest  *, WOContext *);
 typedef id   (*OWInvokeMethod)        (id, SEL, WORequest  *, WOContext *);
 typedef void (*OWAppendResponseMethod)(id, SEL, WOResponse *, WOContext *);
+typedef void (*OWAppendJsonResponseMethod)(id, SEL,
+                                           WOJsonResponse *,
+                                           WOContext *);
 
 #endif /* __NGObjWeb_OWResponder_H__ */

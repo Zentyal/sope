@@ -196,4 +196,19 @@ static BOOL _debugClassify(void) {
   return [[self uri] hasPrefix:@"/servlet/webdav."];
 }
 
+- (BOOL)isSoJSONRequest {
+  /* check handler key */
+  if ([[self requestHandlerKey] isEqualToString:@"json"]) {
+    /* this can be used to force XML-RPC */
+    if (_debugClassify()) {
+      [self logWithFormat:
+              @"classified as JSON because of request-handler-key"];
+    }
+    return YES;
+  }
+  else {
+    return NO;
+  }
+}
+
 @end /* WORequest(SoRequestClassification) */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2005 SKYRIX Software AG
+  Copyright (C) 2014 Zentyal
 
   This file is part of SOPE.
 
@@ -17,28 +17,35 @@
   License along with SOPE; see the file COPYING.  If not, write to the
   Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
   02111-1307, USA.
-*/
+ */
 
-#ifndef __SoObjects_WORequest_So_H__
-#define __SoObjects_WORequest_So_H__
+#import <Foundation/NSString.h>
+#import <NGObjWeb/WOTemplateBuilder.h>
+#import <NGObjWeb/WOJsonComponentDefinition.h>
 
-#import <NGObjWeb/WORequest.h>
+@implementation WOJsonComponentDefinition
 
-/*
-  WORequest(SoRequestClassification)
-  
-  Classify a request to be able to select the proper handler.
-*/
+- (WOTemplateBuilder *) templateBuilderForPath:(NSString *)_path
+{
+  NSString *ext;
 
-@interface WORequest(SoRequestClassification)
+  if ([_path length] == 0)
+    return nil;
 
-- (BOOL)isSoWebDAVRequest;
-- (BOOL)isSoXmlRpcRequest;
-- (BOOL)isSoSOAPRequest;
-- (BOOL)isSoWCAPRequest;
-- (BOOL)isSoBrkDAVRequest;
-- (BOOL)isSoJSONRequest;
+  ext = [_path pathExtension];
+  if ([ext isEqualToString: @"json"]) {
+    static WOTemplateBuilder *jsonBuilder = nil;
+    if (jsonBuilder == nil)
+      jsonBuilder = [NSClassFromString(@"WOJsonTemplateBuilder") new];
+    return jsonBuilder;
+  }
+
+  return nil;
+}
+
+- (BOOL) isJson
+{
+    return YES;
+}
 
 @end
-
-#endif /* __SoObjects_WORequest_So_H__ */

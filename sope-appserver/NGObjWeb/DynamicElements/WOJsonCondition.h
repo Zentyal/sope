@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2005 SKYRIX Software AG
+  Copyright (C) 2014 Zentyal
 
   This file is part of SOPE.
 
@@ -19,26 +19,34 @@
   02111-1307, USA.
 */
 
-#ifndef __SoObjects_WORequest_So_H__
-#define __SoObjects_WORequest_So_H__
+#ifndef WOJsonCondition_H
+#define WOJsonCondition_H 1
 
-#import <NGObjWeb/WORequest.h>
+#include <NGObjWeb/WODynamicElement.h>
 
-/*
-  WORequest(SoRequestClassification)
-  
-  Classify a request to be able to select the proper handler.
-*/
+@interface WOJsonCondition : WODynamicElement
+{
+@protected
+  // WODynamicElement: extraAttributes
+  // WODynamicElement: otherTagString
 
-@interface WORequest(SoRequestClassification)
+  WOAssociation *condition;
+  WOElement     *thenTemplate;
+  WOElement     *elseTemplate;
 
-- (BOOL)isSoWebDAVRequest;
-- (BOOL)isSoXmlRpcRequest;
-- (BOOL)isSoSOAPRequest;
-- (BOOL)isSoWCAPRequest;
-- (BOOL)isSoBrkDAVRequest;
-- (BOOL)isSoJSONRequest;
+  // non-WO
+  WOAssociation *value; // compare the condition with value
 
-@end
+#if DEBUG
+  NSString *condName;
+#endif
+}
 
-#endif /* __SoObjects_WORequest_So_H__ */
+- (id)initWithName:(NSString *)_name
+      associations:(NSDictionary *)_config
+      thenTemplate:(WOElement *)_then
+      elseTemplate:(WOElement *)_else;
+
+@end /* WOJsonCondition */
+
+#endif /* WOJsonCondition_H */

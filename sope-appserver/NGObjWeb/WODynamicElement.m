@@ -132,7 +132,13 @@ static Class FormElementClass = Nil;
   return [[[WOApplication application] context] elementID];
 }
 
-- (void)setExtraAttributes:(NSDictionary *)_extras {
+- (void)setExtraAttributes:(NSDictionary *)_extras
+{
+  [self setExtraAttributes:_extras forJsonTemplate:NO];
+}
+
+- (void)setExtraAttributes:(NSDictionary *)_extras
+           forJsonTemplate:(BOOL)_isJson {
   register WOExtraAttrs *ea;
   NSEnumerator    *ke;
   NSString        *key;
@@ -165,7 +171,7 @@ static Class FormElementClass = Nil;
     //key   = [key lowercaseString];
     value = [_extras objectForKey:key];
     
-    if ([value isValueConstant]) {
+    if (!_isJson && [value isValueConstant]) {
       /* static value (calculated *now*) */
       NSString *s;
       
@@ -193,7 +199,7 @@ static Class FormElementClass = Nil;
       item->key   = [key copy];
       item->value = RETAIN(value);
       item->valQuery = /* cache method IMP */
-        (void*)[value methodForSelector:@selector(stringValueInComponent:)];
+        (void*)[value methodForSelector:@selector(valueInComponent:)];
       ea->count++;
     }
   }
@@ -263,6 +269,43 @@ static Class FormElementClass = Nil;
     /* add static string */
     if (ea->extraString)
       WOResponse_AddString(_response, ea->extraString);
+  }
+}
+
+- (void)appendExtraAttributesToDictionary:(NSMutableDictionary *)_attrs
+                                inContext:(WOContext *)_ctx
+{
+  if (self->extraAttributes) {
+    register WOExtraAttrs *ea;
+    
+    ea = self->extraAttributes;
+    
+    if (ea->count > 0) {
+      /* has dynamic attributes */
+      WOComponent *sComponent;
+      register unsigned short i;
+      
+      sComponent = [_ctx component];
+      
+      for (i = 0; i < ea->count; i++) {
+        register WOExtraAttrItem *item;
+        id value;
+        
+        item = &(ea->items[i]);
+        
+        if (item->valQuery) {
+          /* use cached selector implementation */
+          value = item->valQuery(item->value,@selector(valueInComponent:),
+                                 sComponent);
+        }
+        else {
+          value = [item->value valueInComponent:sComponent];
+        }
+        if (!value)
+            value = [NSNull null];
+        [_attrs setObject: value forKey: item->key];
+      }
+    }
   }
 }
 

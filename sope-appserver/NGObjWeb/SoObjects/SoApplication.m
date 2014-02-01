@@ -65,6 +65,7 @@ static BOOL debugLookup = NO;
     [self registerRequestHandler:tmp forKey:@"so"];
     [self registerRequestHandler:tmp forKey:@"dav"];
     [self registerRequestHandler:tmp forKey:@"RPC2"];
+    [self registerRequestHandler:tmp forKey:@"json"];
     [self setDefaultRequestHandler:tmp];
     [tmp release];
     

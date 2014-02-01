@@ -21,6 +21,9 @@
 
 #include "WOInput.h"
 
+#include "WOJsonResponse.h"
+
+
 @interface WOFileUpload : WOInput
 {
   // WODynamicElement: extraAttributes
@@ -180,6 +183,27 @@ static NGMimeType *multipartFormData = nil;
                                 [_ctx component]]);
   }
   WOResponse_AddEmptyCloseParens(_response, _ctx);
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableDictionary *attributes;
+  NSString *v;
+  
+  if ([_ctx isRenderingDisabled] || [[_ctx request] isFromClientComponent])
+    return;
+  
+  attributes = [NSMutableDictionary new];
+  [attributes setObject: @"text" forKey: @"file"];
+  [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
+
+  v = [self->value stringValueInComponent:[_ctx component]];
+  if (v != nil) {
+    [attributes setObject: v forKey: @"value"];
+  }
+  [self appendExtraAttributesToDictionary:attributes inContext:_ctx];
+  [_response appendInput: attributes];
+  [attributes release];
 }
 
 /* description */

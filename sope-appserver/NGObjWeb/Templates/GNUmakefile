@@ -14,6 +14,7 @@ Templates_OBJC_FILES =   \
 	WOComponentScriptPart.m		\
 	WODParser.m			\
 	WOHTMLParser.m			\
+	WOJsonTemplateBuilder.m		\
 	WOSubcomponentInfo.m		\
 	WOTemplate.m			\
 	WOTemplateBuilder.m		\
@@ -23,6 +24,7 @@ Templates_OBJC_FILES =   \
         WOxElemBuilder.m		\
 	WOxTagClassElemBuilder.m	\
 	WOApplication+Builders.m	\
+
 
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/subproject.make

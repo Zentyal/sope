@@ -23,6 +23,7 @@
 #include "SoClassSecurityInfo.h"
 #include "SoProduct.h"
 #include "WOContext+SoObjects.h"
+#include "WORequest+So.h"
 #include <NGObjWeb/WOComponent.h>
 #include <NGObjWeb/WOContext.h>
 #include <NGObjWeb/WOSession.h>
@@ -118,7 +119,7 @@ static int debugOn = 0;
   WOResourceManager *rm;
   WOComponent *lPage;
   NSArray     *languages;
-  
+
   if (debugOn) {
     [self debugWithFormat:@"instantiate page: %@", self->methodObject];
     if (self->product == nil)
@@ -150,8 +151,11 @@ static int debugOn = 0;
   languages = [_ctx resourceLookupLanguages];
 
   /* instantiate */
-  
-  lPage = [rm pageWithName:[self pageName] languages:languages];
+
+  if ([[_ctx request] isSoJSONRequest])
+      lPage = [rm jsonPageWithName:[self pageName] languages:languages];
+  else
+      lPage = [rm pageWithName:[self pageName] languages:languages];
   [lPage ensureAwakeInContext:_ctx];
   [lPage setResourceManager:rm];
   

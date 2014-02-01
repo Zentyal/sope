@@ -20,6 +20,7 @@
 */
 
 #include "WOInput.h"
+#include "WOJsonResponse.h"
 #include "decommon.h"
 
 @interface WOCheckBox : WOInput
@@ -124,6 +125,41 @@
   else {
     WOResponse_AddCString(_response, ">");
   }
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableDictionary *attributes;
+  NSString *v;
+  BOOL     isChecked;
+  
+  if ([_ctx isRenderingDisabled] || [[_ctx request] isFromClientComponent])
+    return;
+
+  attributes = [NSMutableDictionary new];
+  [attributes setObject: @"checkbox" forKey: @"type"];
+  [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
+
+  v = [self->value stringValueInComponent:[_ctx component]];
+  if (v)
+    [attributes setObject: v forKey: @"value"];
+  isChecked = [self->checked boolValueInComponent:[_ctx component]];
+
+  if (self->disabled != nil) {
+      if ([self->disabled boolValueInComponent:[_ctx component]]) {
+          [attributes setObject: [NSNumber numberWithBool: YES]
+                      forKey: @"disabled"];
+      }
+  }
+
+  if (isChecked) {
+      [attributes setObject: [NSNumber numberWithBool: YES]
+                  forKey: @"checked"];
+  }
+
+  [self appendExtraAttributesToDictionary:attributes inContext:_ctx];
+  [_response appendInput: attributes];
+  [attributes release];
 }
 
 /* description */

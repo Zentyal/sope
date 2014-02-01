@@ -85,12 +85,16 @@
 - (id)initWithPath:(NSString *)_path;
 + (void)setResourcePrefix:(NSString *)_prefix;
 
-- (WOElement *)templateWithName:(NSString *)_name languages:(NSArray *)_langs;
-- (id)pageWithName:(NSString *)_name languages:(NSArray *)_langs;
+- (WOElement *)templateWithName:(NSString *)_name languages:(NSArray *)_langs
+                        useJson:(BOOL) useJson;
 
-- (NSString *)pathToComponentNamed:(NSString *)_name
-  inFramework:(NSString *)_framework
-  languages:(NSArray *)_langs;
+- (id)pageWithName:(NSString *)_name languages:(NSArray *)_langs;
+- (id)jsonPageWithName:(NSString *)_name languages:(NSArray *)_langs;
+
+- (NSString *) pathToComponentNamed:(NSString *)_name
+                        inFramework:(NSString *)_framework
+                          languages:(NSArray *)_langs
+                            useJson:(BOOL)_useJson;
 
 - (void)setCachingEnabled:(BOOL)_flag;
 - (BOOL)isCachingEnabled;

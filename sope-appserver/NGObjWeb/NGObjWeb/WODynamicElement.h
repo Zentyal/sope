@@ -56,7 +56,11 @@ struct _WOExtraAttrStruct;
 @interface WODynamicElement(PrivateMethods)
 
 - (void)setExtraAttributes:(NSDictionary *)_extras;
+- (void)setExtraAttributes:(NSDictionary *)_extras
+           forJsonTemplate:(BOOL)_isJson;
 - (void)appendExtraAttributesToResponse:(WOResponse *)_response
+  inContext:(WOContext *)_ctx;
+- (void)appendExtraAttributesToDictionary:(NSMutableDictionary *)_attrs
   inContext:(WOContext *)_ctx;
 
 - (id)template;

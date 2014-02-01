@@ -24,6 +24,7 @@
 #include <NGObjWeb/WOResourceManager.h>
 #include <NGObjWeb/WOContext.h>
 #include <NGObjWeb/WOApplication.h>
+#include "SoObjects/WORequest+So.h"
 #include "common.h"
 
 @implementation WOComponentFault
@@ -101,8 +102,13 @@
     ;
   else
     rm = [[WOApplication application] resourceManager];
-  
-  c = [rm pageWithName:self->pageName languages:self->languages];
+
+  WOContext *localCtx = [[WOApplication application] context];
+
+  if ([[localCtx request] isSoJSONRequest])
+      c = [rm jsonPageWithName:self->pageName languages:self->languages];
+  else
+      c = [rm pageWithName:self->pageName languages:self->languages];
   //[self logWithFormat:@"  rm:   %@", rm];
   //[self logWithFormat:@"  c:    %@", c];
   

@@ -134,6 +134,16 @@
   return label;
 }
 
+- (NSString *) key
+{
+  return key;
+}
+
+- (NSString *) defaultValue
+{
+  return defaultValue;
+}
+
 - (BOOL)isValueConstant {
   return NO;
 }

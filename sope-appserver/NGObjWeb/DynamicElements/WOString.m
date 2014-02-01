@@ -26,6 +26,10 @@
 #import <Foundation/NSNumberFormatter.h>
 #import <Foundation/NSDateFormatter.h>
 
+#include "Associations/WOLabelAssociation.h"
+#include "Associations/WOKeyPathAssociation.h"
+#include "WOJsonResponse.h"
+
 /*
   Usage:
     MyString: WOString {
@@ -88,6 +92,17 @@
 
 @implementation WOString
 
+static Class NSStringK;
+static Class WOLabelAssociationK;
+static Class WOKeyPathAssociationK;
+
+
++ (void)initialize {
+  NSStringK = [NSString class];
+  WOLabelAssociationK = [WOLabelAssociation class];
+  WOKeyPathAssociationK = [WOKeyPathAssociation class];
+}
+
 + (id)allocWithZone:(NSZone *)zone {
   static Class WOStringClass = Nil;
   static _WOTemporaryString *temporaryString = nil;
@@ -127,6 +142,30 @@
 - (void)appendToResponse:(WOResponse *)_resp inContext:(WOContext *)_ctx {
   if (![_ctx isRenderingDisabled])
     [_resp appendContentHTMLString:[self->value stringValueInContext:_ctx]];
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_resp
+                   inContext:(WOContext *)_ctx {
+    if (![_ctx isRenderingDisabled]) {
+        id val = [self->value valueInComponent:[_ctx component]];
+        if (val) {
+            NSString *key = nil;
+            if ([self->value isKindOfClass: WOLabelAssociationK]) {
+                key = [(WOLabelAssociation *) self->value key];
+                [_resp appendLabelWithKey: key value: val];
+            }
+            else {
+                if ([self->value isKindOfClass: WOKeyPathAssociationK])
+                    key = [(WOKeyPathAssociation *) self->value keyPath];
+                else {
+                    if ([val isKindOfClass: NSStringK])
+                        key = val;
+                }
+                if (key)
+                    [_resp appendValueWithKey: key value: val];
+            }
+        }
+    }
 }
 
 /* description */
@@ -240,6 +279,13 @@
 - (void)appendToResponse:(WOResponse *)_response inContext:(WOContext *)_ctx {
   if (![_ctx isRenderingDisabled])
     WOResponse_AddString(_response, self->value);
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_resp
+                   inContext:(WOContext *)_ctx {
+    if (![_ctx isRenderingDisabled]) {
+        [_resp appendString: self->value];
+    }
 }
 
 /* description */
@@ -366,10 +412,17 @@
     if (self->value) WOResponse_AddCString(_response, self->value);
 }
 
+- (void)appendToJsonResponse:(WOJsonResponse *)_resp
+                   inContext:(WOContext *)_ctx {
+    if (![_ctx isRenderingDisabled]) {
+        [_resp appendString: [NSString stringWithFormat: @"%s", value]];
+    }
+}
+
 /* description */
 
 - (NSString *)associationDescription {
-  return [NSString stringWithFormat:@" value='%s'", 
+  return [NSString stringWithFormat:@" value='%s'",
                      self->value ? self->value : (void*)""];
 }
 
@@ -636,6 +689,67 @@ closeSpan:
   if (styleName) {
     [_response appendContentString:@"</span>"];
   }
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  WOComponent *sComponent;
+  NSFormatter *fmt;
+  id          obj    = nil;
+  NSString    *key, *jsonValue;
+
+  if ([_ctx isRenderingDisabled] || [[_ctx request] isFromClientComponent])
+    return;
+
+  sComponent = [_ctx component];
+  fmt        = [self _formatterInContext:_ctx];
+
+#if DEBUG
+  if (fmt!=nil && ![fmt respondsToSelector:@selector(stringForObjectValue:)]) {
+    [sComponent errorWithFormat:
+                  @"invalid formatter determined by keypath %@: %@",
+                  self->formatter, fmt];
+  }
+#endif
+
+  key    = [self->value value];
+  obj    = [self->value valueInContext:_ctx];
+
+  if (fmt) {
+    NSString *formattedObj;
+    
+    formattedObj = [fmt stringForObjectValue:obj];
+#if 0
+    if (formattedObj == nil) {
+      [self warnWithFormat:@"formatter %@ returned nil string for object %@",
+                           fmt, obj];
+    }
+#endif
+    
+    obj = formattedObj;
+  }
+  
+  jsonValue = obj;
+
+  /* handling of empty and nil values */
+
+  if (self->valueWhenEmpty != nil) {
+    if (![obj isNotEmpty]) {
+      NSString *s;
+
+      s = [self->valueWhenEmpty valueInComponent:sComponent];
+
+      if (s != nil) {
+        jsonValue = s;
+      }
+    }
+  }
+  else if (self->nilString != nil && obj == nil) {
+    jsonValue = [self->nilString valueInComponent:sComponent];
+  }
+
+  if (jsonValue)
+    [_response appendValueWithKey: key value: jsonValue];
 }
 
 /* description */

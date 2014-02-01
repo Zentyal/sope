@@ -246,6 +246,7 @@
     "context.soRequestType='WebDAV'  => renderer = 'SoWebDAVRenderer' ; high",
     "context.soRequestType='XML-RPC' => renderer = 'SoXmlRpcRenderer' ; high",
     "context.soRequestType='SOAP'    => renderer = 'SoSOAPRenderer' ;   high",
+    "request.isSoJSONRequest=YES     => renderer = 'SoJsonRenderer' ;   high",
     "*true* => renderer = 'SoDefaultRenderer' ; fallback",
     
     "request.isSoSOAPRequest=YES   => dispatcher = 'SoObjectSOAPDispatcher'",
@@ -256,6 +257,7 @@
     "request.isSoSOAPRequest=YES   => requestType = 'SOAP'",
     "request.isSoWebDAVRequest=YES => requestType = 'WebDAV'",
     "request.isSoXmlRpcRequest=YES => requestType = 'XML-RPC'",
+    "request.isSoJSONRequest=YES   => requestType = 'JSON'",
     "*true*                        => requestType = 'METHOD'; fallback",
     
     "request.isSoWebDAVRequest=YES => useAcquisition = NO",

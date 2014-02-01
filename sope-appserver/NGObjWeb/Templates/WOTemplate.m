@@ -119,6 +119,11 @@
   [self->rootElement appendToResponse:_response inContext:_ctx];
 }
 
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  [self->rootElement appendToJsonResponse:_response inContext:_ctx];
+}
+
 /* description */
 
 - (NSString *)description {

@@ -52,6 +52,8 @@ static id numStrings[100];
       [self methodForSelector:@selector(takeValuesFromRequest:inContext:)];
     self->appendResponse = (OWAppendResponseMethod)
       [self methodForSelector:@selector(appendToResponse:inContext:)];
+    self->appendJsonResponse = (OWAppendJsonResponseMethod)
+      [self methodForSelector:@selector(appendToJsonResponse:inContext:)];
 #else
 #  warning methods are not cached !
 #endif
@@ -96,6 +98,11 @@ static id numStrings[100];
 }
 
 - (void)appendToResponse:(WOResponse *)_response inContext:(WOContext *)_ctx {
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  [self notImplemented: _cmd];
 }
 
 /* forms */

@@ -192,4 +192,42 @@ static Class NSDateClass = Nil;
   }
 }
 
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx
+{
+  WOComponent *parent, *child;
+  NSTimeInterval st = 0.0;
+  
+  if ((parent = [_ctx component]) == nil) {
+    [self warnWithFormat:
+            @"%s: did not find parent component of child %@",
+            __PRETTY_FUNCTION__, self->childName];
+    return;
+  }
+  if ((child = [parent childComponentWithName:self->childName]) == nil) {
+    [self warnWithFormat:
+            @"did not find child component %@ of parent %@",
+            self->childName, [parent name]];
+    if ([_ctx isRenderingDisabled]) return;
+    return;
+  }
+  
+  if (profileComponents)
+    st = [[NSDateClass date] timeIntervalSince1970];
+  
+  WOContext_enterComponent(_ctx, child, self->template);
+  [child appendToJsonResponse:_response inContext:_ctx];
+  WOContext_leaveComponent(_ctx, child);
+  
+  if (profileComponents) {
+    NSTimeInterval diff;
+    int i;
+    diff = [[NSDateClass date] timeIntervalSince1970] - st;
+    for (i = [_ctx componentStackCount]; i >= 0; i--)
+      printf("  ");
+    printf("[%s %s]: %0.3fs\n",
+           [[child name] cString], sel_get_name(_cmd), diff);
+  }
+}
+
 @end /* WOChildComponentReference */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2005 SKYRIX Software AG
+  Copyright (C) 2014 Zentyal
 
   This file is part of SOPE.
 
@@ -17,28 +17,14 @@
   License along with SOPE; see the file COPYING.  If not, write to the
   Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
   02111-1307, USA.
-*/
+ */
 
-#ifndef __SoObjects_WORequest_So_H__
-#define __SoObjects_WORequest_So_H__
+#ifndef WOJSONCOMPONENTDEFINITION_H
+#define WOJSONCOMPONENTDEFINITION_H
 
-#import <NGObjWeb/WORequest.h>
+#import <NGObjWeb/WOComponentDefinition.h>
 
-/*
-  WORequest(SoRequestClassification)
-  
-  Classify a request to be able to select the proper handler.
-*/
-
-@interface WORequest(SoRequestClassification)
-
-- (BOOL)isSoWebDAVRequest;
-- (BOOL)isSoXmlRpcRequest;
-- (BOOL)isSoSOAPRequest;
-- (BOOL)isSoWCAPRequest;
-- (BOOL)isSoBrkDAVRequest;
-- (BOOL)isSoJSONRequest;
-
+@interface WOJsonComponentDefinition : WOComponentDefinition
 @end
 
-#endif /* __SoObjects_WORequest_So_H__ */
+#endif /* WOJSONCOMPONENTDEFINITION_H */

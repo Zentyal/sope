@@ -23,6 +23,7 @@
 #include "decommon.h"
 #import <Foundation/NSNumberFormatter.h>
 #import <Foundation/NSDateFormatter.h>
+#include "WOJsonResponse.h"
 
 /*
   Usage:
@@ -216,6 +217,55 @@ static inline NSFormatter *_getFormatter(WOTextField *self, WOContext *_ctx) {
                               [_ctx component]]);
   }
   WOResponse_AddEmptyCloseParens(_response, _ctx);
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableDictionary *attributes;
+  NSFormatter *fmt;
+  id       obj;
+  unsigned s;
+  NSString *v;
+
+  if ([_ctx isRenderingDisabled]) return;
+
+  attributes = [NSMutableDictionary new];
+  obj = [self->value valueInComponent:[_ctx component]];
+  if ((fmt = _getFormatter(self, _ctx)) != nil) {
+    NSString *formattedObj;
+
+    formattedObj = [fmt editingStringForObjectValue:obj];
+
+#if 0
+    if (formattedObj == nil) {
+      NSLog(@"WARNING: formatter %@ returned nil string for object %@",
+            fmt, obj);
+    }
+#endif
+    obj = formattedObj;
+  }
+
+  [attributes setObject: @"text" forKey: @"type"];
+  [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
+
+  v = [obj stringValue];
+  if (v)
+    [attributes setObject: v forKey: @"value"];
+  s = [self->size unsignedIntValueInComponent:[_ctx component]];
+  if (s > 0) {
+      [attributes setObject: [NSNumber numberWithUnsignedInt: s]
+                  forKey: @"size"];
+  }
+  if (self->disabled != nil) {
+      if ([self->disabled boolValueInComponent:[_ctx component]]) {
+          [attributes setObject: [NSNumber numberWithBool: YES]
+                      forKey: @"disabled"];
+      }
+  }
+
+  [self appendExtraAttributesToDictionary: attributes inContext:_ctx];
+  [_response appendInput: attributes];
+  [attributes release];
 }
 
 /* description */
