@@ -46,7 +46,6 @@ libNGObjWeb_HEADER_FILES = \
 	NGObjWeb.h			\
 	OWResponder.h			\
 	OWViewRequestHandler.h		\
-	OWResourceManager.h		\
 	WEClientCapabilities.h		\
 	WOActionResults.h		\
 	WOAdaptor.h			\
@@ -109,7 +108,6 @@ libNGObjWeb_OBJC_FILES = \
 	NGHttp+WO.m			\
 	NGObjWeb.m 			\
 	OWViewRequestHandler.m		\
-	OWResourceManager.m		\
 	WEClientCapabilities.m		\
 	WOAdaptor.m			\
 	WOApplicationMain.m		\
