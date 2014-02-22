@@ -178,15 +178,6 @@ wod_OBJC_FILES  += wod.m $(NGObjWebCore_OBJC_FILES)
 wod_SUBPROJECTS = Templates Associations
 
 
-# ----- NGObjWeb text tools
-
-TEST_TOOL_NAME = testloadjson
-
-testloadjson_OBJC_FILES  = testload.m
-testloadjson_SUBPROJECTS = Templates Associations
-testloadjson_TOOL_LIBS += $(sope-json-libs) $(sope-core-libs) $(sope-xml-libs) $(sope-ngobjweb-libs)
-
-
 # building
 
 -include GNUmakefile.preamble
