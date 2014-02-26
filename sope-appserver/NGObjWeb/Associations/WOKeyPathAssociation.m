@@ -519,6 +519,7 @@ static WOReturnValueHolder _getComponentValue(WOKeyPathAssociation *self,
   
   // execute
   if (info->type == WOKeyType_method) {
+  try_as_method:
 #if HEAVY_DEBUG
     [self logWithFormat:@"get key %s of keyPath %@\n"
 	  @"  from: 0x%p[%@]\n"
@@ -618,6 +619,22 @@ static WOReturnValueHolder _getComponentValue(WOKeyPathAssociation *self,
     
     retValue.object =
       info->access.method(object, @selector(valueForKey:), info->extra.key);
+
+    if (!retValue.object) {
+        if ([object kvcIsPreferredInKeyPath]) {
+            /* a hack to force method lookup whenever a key with the specified
+               name is not found */
+            SEL methodSel = NSSelectorFromString(info->extra.key);
+            struct objc_method *method
+                = class_get_instance_method([object class], methodSel);
+            if (method != METHOD_NULL) {
+                info->type = WOKeyType_unknown;
+                info->access.method = method_get_imp(method);
+                info->extra.sel.get = methodSel;
+                goto try_as_method;
+            }
+        }
+    }
   }
   else if (info->type == WOKeyType_binding) {
 #if HEAVY_DEBUG
