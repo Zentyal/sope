@@ -23,7 +23,8 @@ endif
 
 # install makefiles
 
-after-install :: $(DESTDIR)/$(GNUSTEP_MAKEFILES)/Additional/ngobjweb.make
+
+after-install :: $(DESTDIR)/$(GNUSTEP_MAKEFILES)/Additional/ngobjweb.make $(DESTDIR)$(GNUSTEP_$(GNUSTEP_INSTALLATION_DOMAIN)_TOOLS)/wox-to-json
 
 ifneq ($(GNUSTEP_MAKE_VERSION),1.3.0)
 after-install :: $(DESTDIR)/$(GNUSTEP_MAKEFILES)/woapp.make $(DESTDIR)/$(GNUSTEP_MAKEFILES)/wobundle.make
@@ -40,3 +41,8 @@ $(DESTDIR)/$(GNUSTEP_MAKEFILES)/woapp.make: woapp-gs.make
 $(DESTDIR)/$(GNUSTEP_MAKEFILES)/wobundle.make: wobundle-gs.make
 	$(INSTALL_DATA) wobundle-gs.make \
 		$(DESTDIR)/$(GNUSTEP_MAKEFILES)/wobundle.make
+
+$(DESTDIR)$(GNUSTEP_$(GNUSTEP_INSTALLATION_DOMAIN)_TOOLS)/wox-to-json: wox-to-json.py
+	$(INSTALL_PROGRAM) -m 0755 wox-to-json.py $(DESTDIR)$(GNUSTEP_$(GNUSTEP_INSTALLATION_DOMAIN)_TOOLS)/wox-to-json
+
+
