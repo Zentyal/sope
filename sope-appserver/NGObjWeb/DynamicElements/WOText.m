@@ -19,10 +19,11 @@
   02111-1307, USA.
 */
 
-#include "WOInput.h"
-#include "decommon.h"
 #import <Foundation/NSNumberFormatter.h>
 #import <Foundation/NSDateFormatter.h>
+#include "WOInput.h"
+#include "WOJsonResponse.h"
+#include "decommon.h"
 
 @interface WOText : WOInput
 {
@@ -226,6 +227,67 @@ static inline NSFormatter *_getFormatter(WOText *self, WOContext *_ctx) {
   }
   
   WOResponse_AddCString(_response, "</textarea>");
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableDictionary *attributes;
+  WOComponent *sComponent;
+  NSFormatter *fmt;
+  id v;
+  NSUInteger r, c;
+
+  if ([_ctx isRenderingDisabled]) return;
+
+  attributes = [NSMutableDictionary new];
+
+  sComponent = [_ctx component];
+  v  = [self->value valueInComponent:sComponent];
+  r  = [self->rows unsignedIntValueInComponent:sComponent];
+  c  = [self->cols unsignedIntValueInComponent:sComponent];
+
+  fmt = _getFormatter(self, _ctx);
+  if (fmt) {
+    NSString *formattedObj = nil;
+
+    formattedObj = [fmt editingStringForObjectValue:v];
+    v = formattedObj;
+  }
+  else
+    v = [v stringValue];
+
+  [attributes setObject: @"textarea" forKey: @"type"];
+  [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
+
+  if (r > 0)
+    [attributes setObject: [NSNumber numberWithUnsignedInt: r]
+                   forKey: @"rows"];
+  if (c > 0)
+    [attributes setObject: [NSNumber numberWithUnsignedInt: c]
+                   forKey: @"cols"];
+  if ([self->disabled boolValueInComponent:sComponent])
+    [attributes setObject: [NSNumber numberWithBool: YES]
+                   forKey: @"disabled"];
+
+  [self appendExtraAttributesToDictionary:attributes inContext:_ctx];
+
+  if ([v length] > 0) {
+    BOOL     removeCR = NO;
+    NSString *ua;
+    
+    ua = [[_ctx request] headerForKey:@"user-agent"];
+    
+    if ([ua rangeOfString:@"Opera"].length > 0)
+      removeCR = YES;
+    
+    if (removeCR)
+      v = [v stringByReplacingString:@"\r" withString:@""];
+  
+    [attributes setObject: v forKey: @"value"];
+  }
+
+  [_response appendInput: attributes];
+  [attributes release];
 }
 
 /* description */
