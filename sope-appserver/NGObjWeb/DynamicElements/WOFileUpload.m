@@ -194,7 +194,7 @@ static NGMimeType *multipartFormData = nil;
     return;
   
   attributes = [NSMutableDictionary new];
-  [attributes setObject: @"text" forKey: @"file"];
+  [attributes setObject: @"file" forKey: @"type"];
   [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
 
   v = [self->value valueInComponent:[_ctx component]];
