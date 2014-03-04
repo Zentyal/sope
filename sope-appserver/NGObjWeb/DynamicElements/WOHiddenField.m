@@ -83,15 +83,12 @@
   attributes = [NSMutableDictionary new];
   [attributes setObject: @"hidden" forKey: @"type"];
   [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
-  NSString *v = [self->value stringValueInComponent:[_ctx component]];
+  NSString *v = [self->value valueInComponent:[_ctx component]];
   if (v)
-      [attributes setObject: v forKey: @"value"];
-  if (self->disabled != nil) {
-      if ([self->disabled boolValueInComponent:[_ctx component]]) {
-          [attributes setObject: [NSNumber numberWithBool: YES]
-                      forKey: @"disabled"];
-      }
-  }
+    [attributes setObject: v forKey: @"value"];
+  if ([self->disabled boolValueInComponent:[_ctx component]])
+    [attributes setObject: [NSNumber numberWithBool: YES]
+                   forKey: @"disabled"];
 
   [self appendExtraAttributesToDictionary: attributes inContext:_ctx];
   [_response appendInput: attributes];

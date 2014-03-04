@@ -272,17 +272,6 @@ static inline NSFormatter *_getFormatter(WOText *self, WOContext *_ctx) {
   [self appendExtraAttributesToDictionary:attributes inContext:_ctx];
 
   if ([v length] > 0) {
-    BOOL     removeCR = NO;
-    NSString *ua;
-    
-    ua = [[_ctx request] headerForKey:@"user-agent"];
-    
-    if ([ua rangeOfString:@"Opera"].length > 0)
-      removeCR = YES;
-    
-    if (removeCR)
-      v = [v stringByReplacingString:@"\r" withString:@""];
-  
     [attributes setObject: v forKey: @"value"];
   }
 

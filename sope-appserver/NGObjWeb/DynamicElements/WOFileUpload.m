@@ -188,7 +188,7 @@ static NGMimeType *multipartFormData = nil;
 - (void)appendToJsonResponse:(WOJsonResponse *)_response
                    inContext:(WOContext *)_ctx {
   NSMutableDictionary *attributes;
-  NSString *v;
+  id v;
   
   if ([_ctx isRenderingDisabled] || [[_ctx request] isFromClientComponent])
     return;
@@ -197,7 +197,7 @@ static NGMimeType *multipartFormData = nil;
   [attributes setObject: @"text" forKey: @"file"];
   [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
 
-  v = [self->value stringValueInComponent:[_ctx component]];
+  v = [self->value valueInComponent:[_ctx component]];
   if (v != nil) {
     [attributes setObject: v forKey: @"value"];
   }

@@ -130,7 +130,7 @@
 - (void)appendToJsonResponse:(WOJsonResponse *)_response
                    inContext:(WOContext *)_ctx {
   NSMutableDictionary *attributes;
-  NSString *v;
+  id v;
   BOOL     isChecked;
   
   if ([_ctx isRenderingDisabled] || [[_ctx request] isFromClientComponent])
@@ -140,7 +140,7 @@
   [attributes setObject: @"checkbox" forKey: @"type"];
   [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
 
-  v = [self->value stringValueInComponent:[_ctx component]];
+  v = [self->value valueInComponent:[_ctx component]];
   if (v)
     [attributes setObject: v forKey: @"value"];
   isChecked = [self->checked boolValueInComponent:[_ctx component]];

@@ -225,7 +225,7 @@ static inline NSFormatter *_getFormatter(WOTextField *self, WOContext *_ctx) {
   NSFormatter *fmt;
   id       obj;
   unsigned s;
-  NSString *v;
+  id v;
 
   if ([_ctx isRenderingDisabled]) return;
 
@@ -248,7 +248,7 @@ static inline NSFormatter *_getFormatter(WOTextField *self, WOContext *_ctx) {
   [attributes setObject: @"text" forKey: @"type"];
   [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
 
-  v = [obj stringValue];
+  v = [self->value valueInComponent:[_ctx component]];
   if (v)
     [attributes setObject: v forKey: @"value"];
   s = [self->size unsignedIntValueInComponent:[_ctx component]];
