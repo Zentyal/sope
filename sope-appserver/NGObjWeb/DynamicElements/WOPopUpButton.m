@@ -19,6 +19,8 @@
   02111-1307, USA.
 */
 
+#include "WOJsonResponse.h"
+
 #include "WOInput.h"
 
 @class WOAssociation;
@@ -48,6 +50,8 @@
 
 @interface WOPopUpButton(PrivateMethods)
 - (void)appendOptionsToResponse:(WOResponse *)_response
+  inContext:(WOContext *)_ctx;
+- (void)appendOptionsToJsonAttrs:(NSMutableDictionary *)_attrs
   inContext:(WOContext *)_ctx;
 @end
 
@@ -439,6 +443,93 @@ static BOOL debugPopUp = NO;
     [self->item setValue:nil inComponent:sComponent]; // Reset 'item'
 }
 
+- (void)appendOptionsToJsonOptions:(NSMutableArray *)_options
+  inContext:(WOContext *)_ctx
+{
+  WOComponent *sComponent = [_ctx component];
+  NSString *nilStr  = nil;
+  NSArray  *array   = nil;
+  id       sel = nil;
+  int      i, toGo;
+  BOOL     byVal;
+
+  nilStr      = [self->noSelectionString stringValueInComponent:sComponent];
+  array       = [self->list              valueInComponent:sComponent];
+  if (self->selection == nil){
+    if (self->selectedValue != nil){
+      byVal = YES;
+      sel = [self->selectedValue valueInComponent:sComponent];
+    }
+    else{
+      byVal = NO;
+      sel = nil;
+    }
+  }
+  else{
+    if (self->selectedValue != nil){
+      byVal = YES;
+      sel = [self->selectedValue valueInComponent:sComponent];
+      NSLog(@"WARNING(%@): "
+            @"using both 'selection' and 'selectedValue' bindings!",
+            self);
+    }
+    else{
+      byVal = NO;
+      sel = [self->selection valueInComponent:sComponent];
+    }
+  }
+  toGo     = [array count];
+
+  NSMutableDictionary *option;
+
+  if (nilStr != nil) {
+    option = [NSMutableDictionary new];
+    [_options addObject: option];
+    [option release];
+    [option setObject: WONoSelectionString forKey: @"value"];
+    [option setObject: nilStr forKey: @"label"];
+  }
+
+  for (i = 0; i < toGo; i++) {
+    NSString *v         = nil;
+    NSString *displayV  = nil;
+    id       object;
+    BOOL     isSelected;
+
+    option = [NSMutableDictionary new];
+    [_options addObject: option];
+    [option release];
+    
+    object = [array objectAtIndex:i];
+    
+    if ([self->item isValueSettable])
+      [self->item setValue:object inComponent:sComponent];
+    
+    isSelected = sel ? [sel isEqual:object] : NO;
+    v = (self->value != nil)
+      ? [self->value stringValueInComponent:sComponent]
+      : (NSString *)[NSString stringWithFormat:@"%i", i];
+
+    if (byVal)
+      isSelected = sel ? [sel isEqual:v] : NO;
+    else
+      isSelected = sel ? [sel isEqual:object] : NO;
+    displayV = self->string
+      ? [self->string stringValueInComponent:sComponent]
+      : [object stringValue];
+
+    if (displayV == nil) displayV = @"<nil>";
+    [option setObject: v forKey: @"value"];
+    if (isSelected) {
+      [option setObject: [NSNumber numberWithBool: YES]
+                 forKey: @"selected"];
+    }
+    [option setObject: displayV forKey: @"label"];
+  }
+  if ([self->item isValueSettable])
+    [self->item setValue:nil inComponent:sComponent]; // Reset 'item'
+}
+
 - (void)appendToResponse:(WOResponse *)_response inContext:(WOContext *)_ctx {
 #if DEBUG
   NSTimeInterval st = 0.0;
@@ -489,6 +580,37 @@ static BOOL debugPopUp = NO;
     }
   }
 #endif
+}
+
+- (void)appendToJsonResponse:(WOJsonResponse *)_response
+                   inContext:(WOContext *)_ctx {
+  NSMutableDictionary *attributes;
+
+  if ([_ctx isRenderingDisabled]) {
+    [self->template appendToJsonResponse:_response inContext:_ctx];
+    return;
+  }
+
+  attributes = [NSMutableDictionary new];
+  [attributes setObject: @"popup" forKey: @"type"];
+  [attributes setObject: OWFormElementName(self, _ctx) forKey: @"name"];
+
+  [self appendExtraAttributesToDictionary: attributes inContext:_ctx];
+
+  if ([self->disabled boolValueInComponent:[_ctx component]])
+      [attributes setObject: [NSNumber numberWithBool: YES]
+                  forKey: @"disabled"];
+
+  NSMutableArray * options;
+  options = [NSMutableArray new];
+  [attributes setObject: options forKey: @"options"];
+  [options release];
+
+  [self appendOptionsToJsonOptions:options inContext:_ctx];
+  [_response appendInput: attributes];
+  [attributes release];
+
+  [self->template appendToJsonResponse:_response inContext:_ctx];
 }
 
 /* description */

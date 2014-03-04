@@ -169,7 +169,11 @@ Class _WORepetition;
     key = [keys objectAtIndex: i];
     param = [self associationFromValue:
                       [parameters objectForKey: key]];
-    [assocParameters setObject: param forKey: key];
+    if (param)
+        [assocParameters setObject: param forKey: key];
+    else
+        [self errorWithFormat: @"malformed parameter in template: %@",
+              [parameters objectForKey: key]];
     [param release];
   }
 
@@ -214,12 +218,14 @@ Class _WORepetition;
     NSUInteger i;
     static NSString *types[] = {@"text", @"file", @"image", @"radio",
                                 @"reset", @"submit", @"hidden",
-                                @"checkbox", @"password", @"textarea"};
+                                @"checkbox", @"password", @"textarea",
+                                @"popup"};
     static NSString *typeClasses[] = {@"WOTextField", @"WOFileUpload",
                                       @"WOImageButton", @"WORadioButton",
                                       @"WOResetButton", @"WOSubmitButton",
                                       @"WOHiddenField", @"WOCheckBox",
-                                      @"WOPasswordField", @"WOText"};
+                                      @"WOPasswordField", @"WOText",
+                                      @"WOPopupButton"};
     Class inputClass = Nil;
 
     type = [[root objectForKey: @"type"] objectForKey: @"value"];
