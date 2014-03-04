@@ -225,14 +225,23 @@ Class _WORepetition;
                                       @"WOResetButton", @"WOSubmitButton",
                                       @"WOHiddenField", @"WOCheckBox",
                                       @"WOPasswordField", @"WOText",
-                                      @"WOPopupButton"};
+                                      @"WOPopUpButton"};
     Class inputClass = Nil;
 
     type = [[root objectForKey: @"type"] objectForKey: @"value"];
-    for (i = 0; i < 10; i++) {
-        if ([type isEqualToString: types[i]])
+    for (i = 0; i < (sizeof(types)/sizeof(NSString *)); i++) {
+        if ([type isEqualToString: types[i]]) {
             inputClass = NSClassFromString(typeClasses[i]);
+            if (!inputClass)
+                [NSException raise: @"JSONError"
+                            format: @"class '%@' for input type '%@' not"
+                             @" found", typeClasses[i], type];
+            break;
+        }
     }
+    if (!inputClass)
+        [NSException raise: @"JSONError"
+                     format: @"no class for input type '%@'", type];
 
     element = [root objectForKey: @"extra"];
     if (element)
