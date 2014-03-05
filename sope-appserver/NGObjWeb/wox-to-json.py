@@ -129,12 +129,10 @@ class JsonInput(JsonObject):
 
     @classmethod
     def default_key_type(cls, key):
-        if (key in {"name", "type", "id", "value", "rows", "menuid",
-                    "placeholder", "readonly"}
+        if (key in {"autocomplete", "name", "type", "id", "value", "rows",
+                    "menuid", "multiple", "placeholder", "readonly"}
             or key in cls.ignored):
             return JsonValue.CONST
-        elif key in {"autocomplete"}:
-            return JsonValue.VAR
         raise Exception("unknown key: " + key)
 
     def __init__(self, doc=""):
@@ -183,28 +181,29 @@ class JsonInput(JsonObject):
         return data
 
 class JsonPopup(JsonObject):
-    ignored = {"id", "onchange"}
-
     @classmethod
     def default_key_type(cls, key):
-        if key in {"name", "list", "item", "string", "selection", "value"}:
+        if key in {"list", "item", "string", "selection", "value"}:
             return JsonValue.VAR
-        elif key in cls.ignored:
+        elif key in {"name"}:
             return JsonValue.CONST
         raise Exception("unknown key: " + key)
 
     def __init__(self, doc=""):
-        self.name = None
         self.type = JsonValue("popup", JsonValue.CONST)
-        self.list = None
+        self.name = None
         self.value = None
+        self.disabled = None
+        self.list = None
         self.item = None
         self.item_string = None
-        self.display_string = None
         self.selection = None
+        self.display_string = None
         self.no_selection_string = None
-        self.disabled = None
-        self.disabled_value = None
+        self.selected_value = None
+        self.escape_html = None
+        self.item_group = None
+        self.extra = {}
 
     def from_attrs(self, attrs):
         for k in attrs:
@@ -212,49 +211,63 @@ class JsonPopup(JsonObject):
 
             if key == "name":
                 self.name = value
-            elif key in "disabled":
-                self.disabled = value
-            elif key in "disabledValue":
-                self.disabledValue = value
             elif key in "value":
                 self.value = value
+            elif key in "disabled":
+                self.disabled = value
+            elif key == "list":
+                self.list = value
             elif key == "item":
                 self.item = value
             elif key == "string":
                 self.item_string = value
-            elif key == "displayString":
-                self.display_string = value
             elif key == "selection":
                 self.selection = value
+            elif key == "displayString":
+                self.display_string = value
             elif key == "noSelectionString":
                 self.no_selection_string = value
-            elif key == "list":
-                self.list = value
-            elif key not in self.ignored:
-                raise Exception("unhandled key: " + key)
+            elif key == "selectedValue":
+                self.selected_value = value
+            elif key == "escapeHTML":
+                self.escape_html = value
+            elif key == "itemGroup":
+                self.item_group = value
+            else:
+                self.extra[key] = value
 
     def json_data(self):
         data = {"type": self.type.json_data()}
+
         if self.name is not None:
             data["name"] = self.name.json_data()
-        if self.disabled is not None:
-            data["disabled"] = self.disabled.json_data()
-        if self.disabled_value is not None:
-            data["disabled-value"] = self.disabled_value.json_data()
         if self.value is not None:
             data["value"] = self.value.json_data()
+        if self.disabled is not None:
+            data["disabled"] = self.disabled.json_data()
         if self.list is not None:
             data["list"] = self.list.json_data()
         if self.item is not None:
             data["item"] = self.item.json_data()
         if self.item_string is not None:
-            data["item-string"] = self.item_string.json_data()
-        if self.display_string is not None:
-            data["display-string"] = self.display_string.json_data()
+            data["string"] = self.item_string.json_data()
         if self.selection is not None:
             data["selection"] = self.selection.json_data()
+        if self.display_string is not None:
+            data["displayString"] = self.display_string.json_data()
         if self.no_selection_string is not None:
-            data["no-selection-string"] = self.no_selection_string.json_data()
+            data["noSelectionString"] = self.no_selection_string.json_data()
+        if self.selected_value is not None:
+            data["selectedValue"] = self.selected_value.json_data()
+        if self.escape_html is not None:
+            data["escapeHTML"] = self.escape_html.json_data()
+        if self.item_group is not None:
+            data["itemGroup"] = self.item_group.json_data()
+        if len(self.extra) > 0:
+            extra = {}
+            for x in self.extra:
+                extra[x] = self.extra[x].json_data()
+            data["extra"] = extra
 
         return data
 
@@ -557,10 +570,11 @@ class ParserTag(object):
 class Parser(XMLParser):
     ignored = {"head", "title", "meta", "link", "if-ie", "body",
                "iframe", "img", "noscript", "script", "div", "ul", "li",
-               "form", "select", "option", "label", "a", "span", "br", "p",
-               "style", "table", "thead", "tbody", "td", "tr", "th", "entity",
-               "fieldset", "legend", "pre", "strong", "small", "h1", "h3",
-               "h4", "h5", "h6", "hr", "dl", "dt", "dd", "font", "button"}
+               "form", "select", "option", "label", "a", "span", "br", "i",
+               "p", "style", "table", "thead", "tbody", "td", "tr", "th",
+               "entity", "fieldset", "legend", "pre", "strong", "small", "h1",
+               "h3", "h4", "h5", "h6", "hr", "dl", "dt", "dd", "font",
+               "button"}
 
     # list of container that will be taken into account only if they are the
     # topmost element of the xml tree
