@@ -660,33 +660,65 @@ NSArray *SOGoMailGetDirectChildren(NSArray *_array, NSString *_fn) {
       RFC822.SIZE
       RFC822.TEXT
   */
-  NSDictionary *result;
-  
+  NSMutableDictionary *result = nil;
+  NSUInteger i, total, step = 1000;
+
   if (_uids == nil)
     return nil;
   if (![_uids isNotEmpty])
     return nil; // TODO: might break empty folders?! return a dict!
-  
+
   /* select folder */
 
   if (![self selectFolder:_url])
     return nil;
-  
+
   /* fetch parts */
-  
-  // TODO: split uids into batches, otherwise Cyrus will complain
-  //       => not really important because we batch before (in the sort)
-  //       if the list is too long, we get a:
-  //       "* BYE Fatal error: word too long"
-  
-  result = [[self client] fetchUids:_uids parts:_parts];
-  if (![[result valueForKey:@"result"] boolValue]) {
-    [self errorWithFormat:@"could not fetch %d uids for url: %@",
-	    [_uids count],_url];
-    return nil;
+
+  total = [_uids count];
+  for (i = 0; i < total; i += step) {
+    NSRange range;
+    NSArray *partial_uids;
+    NSDictionary *partial_result;
+
+    range = NSMakeRange(i, (i + step) > total ? (total - i) : step);
+    partial_uids = [_uids subarrayWithRange: range];
+
+    /* We will only fetch "step" uids each time */
+    partial_result = [[self client] fetchUids:partial_uids parts:_parts];
+
+    if (![[partial_result valueForKey:@"result"] boolValue]) {
+      [self errorWithFormat: @"could not fetch %d uids for url: %@",
+                             [_uids count], _url];
+      return nil;
+    }
+
+    if (!result) {
+      /* First iteration, first result */
+      result = [[partial_result mutableCopy] autorelease];
+      /* RawResponse has already been processed, ignore it */
+      [result removeObjectForKey: @"RawResponse"];
+      continue;
+    }
+
+    /* Merge partial_result into previous result */
+    for (id key in [partial_result keyEnumerator]) {
+      id obj, current_obj;
+
+      current_obj = [result objectForKey: key];
+      if (!current_obj) continue;
+
+      obj = [partial_result objectForKey: key];
+      if ([obj isKindOfClass: [NSArray class]]) {
+        NSArray *data, *current_data, *new_data;
+        data = obj;
+        current_data = current_obj;
+        new_data = [current_data arrayByAddingObjectsFromArray: data];
+        [result setObject: new_data forKey: key];
+      }
+    }
   }
-  
-  //[self logWithFormat:@"RESULT: %@", result];
+
   return (id)result;
 }
 
