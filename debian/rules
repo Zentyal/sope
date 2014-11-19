@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+export DH_VERBOSE=1
+
+export DEB_BUILD_MAINT_OPTIONS=hardening=+bindnow
+include /usr/share/dpkg/buildflags.mk
+# FIXME: dpkg-buildflags / cdbs should support OBJCFLAGS
+DEB_MAKE_BUILD_TARGET = all messages=yes OBJCFLAGS="$(CFLAGS)"
+# This will make sure that the SOGo binary packages will always depend
+# on the latest SOPE
+DEB_DH_MAKESHLIBS_ARGS = -V
+
+include /usr/share/cdbs/1/rules/gnustep.mk
+include /usr/share/cdbs/1/class/gnumakefile.mk
+
+common-configure-arch:: config.make
+
+clean::
+	touch config.make
+	$(MAKE) distclean
+
+config.make:
+	./configure --disable-strip --with-gnustep --with-ssl=gnutls

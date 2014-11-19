@@ -1,0 +1,91 @@
+sope (2.2.9-zentyal1) trusty; urgency=medium
+
+  * New upstream release
+
+ -- Julio J. García Martín <jjgarcia@zentyal.com>  Wed, 19 Nov 2014 12:29:45 +0100
+
+sope (2.1.1-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Sat, 28 Dec 2013 17:40:18 +0100
+
+sope (2.0.7-1) unstable; urgency=low
+
+  * New upstream release.
+  * Include updated watch file written by Bart Martens.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Sun, 11 Aug 2013 20:18:06 +0200
+
+sope (2.0.5-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Fri, 12 Apr 2013 19:47:43 +0200
+
+sope (2.0.4b-1) unstable; urgency=low
+
+  * New upstream release.
+  * Fixes FTBFS on alpha. (Closes: #680735)
+  * Remove patches applied upstream:
+    - 0002-use-gnutls
+    - 0003-close-all-fds-on-daemon-start
+    - 0004-link-everything-correctly
+    - 0006-Fix-FTBFS-on-arm
+    - 0007-Remove-disabling-of-optimization
+  * Call dh_makeshlibs with -V.
+  * Update standards version to 3.9.4.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Thu, 14 Mar 2013 17:19:26 +0100
+
+sope (1.3.16-1) unstable; urgency=low
+
+  * New upstream release.
+  * Drop patches applied upstream:
+    - 0006-Fix-compilation-on-GNU-kFreeBSD
+    - 0008-Fix-stale-cache-issue-when-upgrading.patch
+    - 0009-GNUstep-1.24-fix.patch
+  * Build with hardening enabled.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Fri, 29 Jun 2012 20:53:29 +0200
+
+sope (1.3.15-4) unstable; urgency=low
+
+  * 0007-Fix-FTBFS-on-arm.patch:
+    - Really fix FTBFS this time.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Tue, 12 Jun 2012 01:08:07 +0200
+
+sope (1.3.15-3) unstable; urgency=low
+
+  * 0009-GNUstep-1.24-fix.patch:
+    - Fix to cope with changes in GNUstep 1.24.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Sun, 10 Jun 2012 22:05:37 +0200
+
+sope (1.3.15-2) unstable; urgency=low
+
+  * 0007-Fix-FTBFS-on-arm.patch:
+    - Fix FTBFS on arm that was introduced in the last upstream version.
+  * 0008-Fix-stale-cache-issue-when-upgrading.patch:
+    - Cherry-pick patch from upstream that fixes problems with stale
+      browser caches on upgrades.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Mon, 28 May 2012 16:38:50 +0200
+
+sope (1.3.15-1) unstable; urgency=low
+
+  * New upstream release.
+  * Drop patches applied upstream:
+    - 0006-Fix-compilation-with-Werror-format-security
+    - 0007-gcc-4.7-build-fixes-from-http-www.sogo.nu-bugs-view
+  * Make libsope-dev conflict with libgnustep-dl2-dev. (Closes: #674117)
+  * Add patch 0006-Fix-compilation-on-GNU-kFreeBSD.
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Wed, 23 May 2012 16:46:35 +0200
+
+sope (1.3.14-1) unstable; urgency=low
+
+  * Initial release. (Closes: #672175)
+
+ -- Jeroen Dekkers <jeroen@dekkers.ch>  Wed, 09 May 2012 15:39:17 +0200

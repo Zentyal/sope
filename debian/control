@@ -1,0 +1,54 @@
+Source: sope
+Section: libs
+Priority: optional
+Maintainer: Jeroen Dekkers <jeroen@dekkers.ch>
+Build-Depends: debhelper (>= 9), cdbs, dpkg-dev (>= 1.16.1~), gnustep-make, libgnustep-base-dev, gobjc, libxml2-dev, libldap2-dev, libgnutls-dev, zlib1g-dev, libpq-dev, libmysqlclient-dev, autotools-dev
+Standards-Version: 3.9.4
+Homepage: http://www.sogo.nu/
+Vcs-Browser: http://git.debian.org/?p=collab-maint/sope.git
+Vcs-Git: git://git.debian.org/git/collab-maint/sope.git
+
+Package: libsope1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: SKYRiX Object Publishing Environment (shared libraries)
+ An extensive set of Objective-C frameworks which form a complete Web
+ application server environment. Besides the Apple WebObjects
+ compatible appserver that has been extended with Zope concepts, it
+ contains a large set of reusable classes: XML processing (SAX, DOM),
+ MIME/IMAP4 processing, LDAP connectivity, RDBMS connectivity, and
+ iCalendar parsing.
+ .
+ This package contains the shared libraries.
+
+Package: libsope-dev
+Section: libdevel
+Priority: extra
+Architecture: any
+Depends: libsope1 (= ${binary:Version}), ${misc:Depends}
+Conflicts: libgnustep-dl2-dev
+Description: SKYRiX Object Publishing Environment (development files)
+ An extensive set of Objective-C frameworks which form a complete Web
+ application server environment. Besides the Apple WebObjects
+ compatible appserver that has been extended with Zope concepts, it
+ contains a large set of reusable classes: XML processing (SAX, DOM),
+ MIME/IMAP4 processing, LDAP connectivity, RDBMS connectivity, and
+ iCalendar parsing.
+ .
+ This package contains the development files.
+
+Package: libsope1-dbg
+Section: debug
+Priority: extra
+Architecture: any
+Depends: libsope1 (= ${binary:Version}), ${misc:Depends}
+Description: SKYRiX Object Publishing Environment (debugging symbols)
+ An extensive set of Objective-C frameworks which form a complete Web
+ application server environment. Besides the Apple WebObjects
+ compatible appserver that has been extended with Zope concepts, it
+ contains a large set of reusable classes: XML processing (SAX, DOM),
+ MIME/IMAP4 processing, LDAP connectivity, RDBMS connectivity, and
+ iCalendar parsing.
+ .
+ This package contains the debugging symbols.

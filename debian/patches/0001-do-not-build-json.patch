@@ -1,0 +1,23 @@
+From: Jeroen Dekkers <jeroen@dekkers.ch>
+Date: Mon, 5 Dec 2011 19:35:34 +0100
+Subject: do-not-build-json
+
+The SBJson library is packaged seperately.
+---
+ GNUmakefile |    3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/GNUmakefile b/GNUmakefile
+index b5068bb..a941f3e 100644
+--- a/GNUmakefile
++++ b/GNUmakefile
+@@ -16,8 +16,7 @@ SUBPROJECTS += \
+ 	sope-core	\
+ 	sope-mime	\
+ 	sope-appserver	\
+-	sope-gdl1 \
+-	sope-json
++	sope-gdl1
+ 
+ ifeq ($(HAS_LIBRARY_ldap),yes)
+ SUBPROJECTS += sope-ldap

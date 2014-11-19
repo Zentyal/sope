@@ -1,0 +1,8 @@
+# We bundle a lot of libraries in one binary package, because
+# splitting them up in 11 binary packages isn't very useful.
+package-name-doesnt-match-sonames
+
+# Checked the function calls and the following 2 warnings are false
+# positives.
+libsope1 binary: hardening-no-fortify-functions usr/lib/GNUstep/SaxDrivers-4.9/libxmlSAXDriver.sax/libxmlSAXDriver
+libsope1 binary: hardening-no-fortify-functions usr/lib/libEOControl.so.4.9.74

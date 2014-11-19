@@ -1,0 +1,24 @@
+From: Jeroen Dekkers <jeroen@dekkers.ch>
+Date: Thu, 8 Dec 2011 02:10:56 +0100
+Subject: Do not build xmlrpc and stxsaxdriver
+
+---
+ sope-xml/GNUmakefile |    5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/sope-xml/GNUmakefile b/sope-xml/GNUmakefile
+index 03ef81b..5d27f05 100644
+--- a/sope-xml/GNUmakefile
++++ b/sope-xml/GNUmakefile
+@@ -8,10 +8,7 @@ VERSION=4.5.0
+ 
+ SUBPROJECTS = \
+ 	SaxObjC		\
+-	DOM		\
+-	XmlRpc
+-
+-SUBPROJECTS += STXSaxDriver
++	DOM
+ 
+ ifneq ($(HAS_LIBRARY_xml2),no)
+ SUBPROJECTS += libxmlSAXDriver
