@@ -2,7 +2,7 @@ sope (2.2.9-zentyal2) trusty; urgency=medium
 
   * Memory leak fix
 
- -- Julio J. García Martín <jjgarcia@zentyal.com>  Mon, 24 Nov 2014 13:38:03 +0100
+ -- Julio J. García Martín <jenkins@zentyal.com>  Mon, 24 Nov 2014 13:38:03 +0100
 
 sope (2.2.9-zentyal1) trusty; urgency=medium
 
