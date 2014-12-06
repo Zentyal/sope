@@ -1,3 +1,9 @@
+sope (2.2.9-zentyal3) trusty; urgency=medium
+
+  * Several memory leaks and bugs fixed
+
+ -- Jenkins Zentyal (Zentyal GPG) <jenkins@zentyal.com>  Sat, 06 Dec 2014 11:00:19 +0100
+
 sope (2.2.9-zentyal2) trusty; urgency=medium
 
   * Memory leak fix
