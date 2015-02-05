@@ -1,3 +1,9 @@
+sope (2.2.15-zentyal1) trusty; urgency=medium
+
+  * New upstream release.
+
+ -- Julio J. García Martín <jjgarcia@zentyal.com>  Thu, 05 Feb 2015 14:59:45 +0100
+
 sope (2.2.9-zentyal3) trusty; urgency=medium
 
   * Several memory leaks and bugs fixed
