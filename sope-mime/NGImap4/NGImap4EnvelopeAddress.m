@@ -97,15 +97,31 @@
 
 - (NSString *)baseEMail {
   NSString *t;
-  
+  NSData *data;
+  NSData *qpData;
+
   if (![self->mailbox isNotEmpty])
     return nil;
   if (![self->host isNotEmpty])
     return self->mailbox;
-  
+
   t = [self->mailbox stringByAppendingString:@"@"];
-  return [t stringByAppendingString:self->host];
+  t = [t stringByAppendingString:self->host];
+
+  /* sometimes mailbox and host come from a splitted quoted printable string */
+  if ([t length] <= 6 /* minimum size */)
+    return t;
+
+  if ([t rangeOfString:@"=?"].length > 0) {
+    data = [t dataUsingEncoding:NSUTF8StringEncoding];
+    if (data != nil) {
+      qpData = [data decodeQuotedPrintableValueOfMIMEHeaderField:@"subject"];
+      if (qpData != data) return qpData;
+    }
+  }
+  return t;
 }
+
 - (NSString *)email {
   NSString *t;
   
