@@ -1,3 +1,9 @@
+sope (2.3.1-zentyal1) trusty; urgency=medium
+
+  * Merge inverse upstream
+
+ -- Jenkins Zentyal (Zentyal GPG) <jenkins@zentyal.com>  Mon, 17 Aug 2015 11:10:00 +0200
+
 sope (2.3-zentyal2) trusty; urgency=medium
 
   * Small patch to give more info about crashes
