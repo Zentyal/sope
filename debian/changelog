@@ -1,3 +1,9 @@
+sope (2.3.1-zentyal2) trusty; urgency=medium
+
+  * Fix utf8 attachments
+
+ -- Jenkins Zentyal (Zentyal GPG) <jenkins@zentyal.com>  Thu, 03 Sep 2015 14:44:21 +0200
+
 sope (2.3.1-zentyal1) trusty; urgency=medium
 
   * Merge inverse upstream
