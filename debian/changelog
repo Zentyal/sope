@@ -1,3 +1,9 @@
+sope (2.3.2-zentyal1) trusty; urgency=medium
+
+  * Fixes from upstream
+
+ -- Jenkins Zentyal (Zentyal GPG) <jenkins@zentyal.com> Fri, 09 Oct 2015 14:03:48 +0200
+
 sope (2.3.1-zentyal3) trusty; urgency=medium
 
   * Fix from upstream and revert change of ignoring exceptions
