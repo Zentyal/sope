@@ -1,3 +1,13 @@
+sope (2.3.5-zentyal2) trusty; urgency=medium
+
+  [ Jesús García Sáez ]
+  * [0c9b08] Fix crash encoding qp text
+  * [361178] Start with proper size the new chunk when backtrack happened
+
+  [ Jenkins Zentyal (Zentyal GPG) ]
+
+ -- Jenkins Zentyal (Zentyal GPG) <jenkins@zentyal.com>  Tue, 19 Jan 2016 20:02:00 +0100
+
 sope (2.3.5-zentyal1) trusty; urgency=medium
 
   [ Ludovic Marcotte ]
