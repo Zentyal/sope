@@ -136,6 +136,9 @@ static NSArray *splitWordIfQPEncodingTooBig(NSString *s)
                                                   length: [subdata length]
                                                 encoding: NSUTF8StringEncoding];
         }
+        // Current value of backtrack is 1 higher than it should be
+        // because of the last evaluation of the for loop
+        backtrack--;
         chunk_start = i-1-backtrack;
       }
       [chunk_string autorelease];
