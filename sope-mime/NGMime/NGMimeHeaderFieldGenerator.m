@@ -126,6 +126,7 @@ static NSArray *splitWordIfQPEncodingTooBig(NSString *s)
       if (chunk_string) {
         // Ok, we made the chunk just at the end of a full character
         chunk_start = i-1;
+        chunk_size = 0;
       } else {
         // Let's make the chunk shorted until we can create an ok utf8 string
         // This means we have a partial codepoint not forming a full character
@@ -136,11 +137,14 @@ static NSArray *splitWordIfQPEncodingTooBig(NSString *s)
                                                   length: [subdata length]
                                                 encoding: NSUTF8StringEncoding];
         }
+        // Current value of backtrack is 1 higher than it should be
+        // because of the last evaluation of the for loop
+        backtrack--;
         chunk_start = i-1-backtrack;
+        chunk_size = backtrack * 3;
       }
       [chunk_string autorelease];
       [chunks addObject: chunk_string];
-      chunk_size = 0;
     }
   }
 
