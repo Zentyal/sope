@@ -186,6 +186,8 @@
         in which we could check the -lastException ...
       */
       e = [[sock lastException] retain];
+      [sock close];
+      [sock release];
       [self release];
       e = [e autorelease];
       [e raise];
