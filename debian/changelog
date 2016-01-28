@@ -1,3 +1,13 @@
+sope (2.3.5-zentyal3) trusty; urgency=medium
+
+  [ Carlos Pérez-Aradros Herce ]
+  * [4eac33] Properly free socket when new connection fails
+  * [2e0b91] Ensure NGSocket close method is called (avoid compilation warnings)
+
+  [ Jenkins Zentyal (Zentyal GPG) ]
+
+ -- Jenkins Zentyal (Zentyal GPG) <jenkins@zentyal.com>  Thu, 28 Jan 2016 11:47:33 +0100
+
 sope (2.3.5-zentyal2) trusty; urgency=medium
 
   [ Jesús García Sáez ]
