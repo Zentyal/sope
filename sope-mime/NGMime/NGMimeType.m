@@ -18,6 +18,7 @@
   Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA
   02111-1307, USA.
 */
+#import <NGExtensions/NSString+Encoding.h>
 
 #include "NGMimeType.h"
 #include "NGConcreteMimeType.h"
@@ -89,96 +90,21 @@ static Class NSStringClass  = Nil;
 }
 
 + (NSStringEncoding)stringEncodingForCharset:(NSString *)_s {
-  NSString         *charset;
   NSStringEncoding encoding;
 
-  charset          = [_s lowercaseString];
-  
-  if ([charset length] == 0)
+  if ([_s length] == 0)
     encoding = [NSString defaultCStringEncoding];
-  
-  /* UTF-, ASCII */
-  else if ([charset isEqualToString:@"us-ascii"])
-    encoding = NSASCIIStringEncoding;
-  else if ([charset isEqualToString:@"utf-8"])
-    encoding = NSUTF8StringEncoding;
-  else if ([charset isEqualToString:@"utf-16"])
-    encoding = NSUnicodeStringEncoding;
+  else
+    {
+      encoding = [NSString stringEncodingForEncodingNamed: _s];
+      if (encoding == 0)
+        {
+          [self logWithFormat:@"%s: unknown charset '%@'",
+                __PRETTY_FUNCTION__, _s];
+          encoding = NSISOLatin1StringEncoding;
+        }
+    }
 
-  /* ISO Latin 1 */
-  else if ([charset isEqualToString:@"iso-latin-1"])
-    encoding = NSISOLatin1StringEncoding;
-  else if ([charset isEqualToString:@"iso-8859-1"])
-    encoding = NSISOLatin1StringEncoding;
-  else if ([charset isEqualToString:@"8859-1"])
-    encoding = NSISOLatin1StringEncoding;
-  
-  /* some unsupported, but known encoding */
-  else if ([charset isEqualToString:@"ks_c_5601-1987"]) {
-    encoding = NSISOLatin1StringEncoding;
-  }
-  else if ([charset isEqualToString:@"euc-kr"]) {
-    encoding = NSKoreanEUCStringEncoding;
-  }
-  else if ([charset isEqualToString:@"big5"]) {
-    encoding = NSBIG5StringEncoding;
-  }
-  else if ([charset isEqualToString:@"iso-2022-jp"]) {
-    encoding = NSISO2022JPStringEncoding;
-  }
-  else if ([charset isEqualToString:@"gb2312"]) {
-    encoding = NSGB2312StringEncoding;
-  }
-  else if ([charset isEqualToString:@"koi8-r"]) {
-    encoding = NSKOI8RStringEncoding;
-  }
-  else if ([charset isEqualToString:@"windows-1250"]) {
-    encoding = NSWindowsCP1250StringEncoding;
-  }
-  else if ([charset isEqualToString:@"windows-1251"]) {
-    encoding = NSWindowsCP1251StringEncoding;
-  }
-  else if ([charset isEqualToString:@"windows-1252"]) {
-    encoding = NSWindowsCP1252StringEncoding;
-  }
-  else if ([charset isEqualToString:@"iso-8859-2"]) {
-    encoding = NSISOLatin2StringEncoding;
-  }
-  else if ([charset isEqualToString:@"iso-8859-8-i"]) {
-    encoding = NSISOHebrewStringEncoding;
-  }
-  else if ([charset isEqualToString:@"iso-8859-7"]) {
-    encoding = NSISOGreekStringEncoding;
-  }
-  else if ([charset isEqualToString:@"iso-8859-6"]) {
-    encoding = NSISOArabicStringEncoding;
-  }
-  else if ([charset isEqualToString:@"iso-8859-4"]) {
-    // latin 4 is for baltic languages
-    encoding = NSISOLatin4StringEncoding;
-  }
-  else if ([charset isEqualToString:@"iso-8859-9"]) {
-    // latin 5 is for turkish languages
-    encoding = NSISOLatin5StringEncoding;
-  }
-  else if ([charset isEqualToString:@"x-unknown"] ||
-           [charset isEqualToString:@"unknown"]) {
-    encoding = NSISOLatin1StringEncoding;
-  }
-  /* ISO Latin 9 */
-#if !(NeXT_Foundation_LIBRARY || APPLE_Foundation_LIBRARY)
-  else if ([charset isEqualToString:@"iso-latin-9"])
-    encoding = NSISOLatin9StringEncoding;
-  else if ([charset isEqualToString:@"iso-8859-15"])
-    encoding = NSISOLatin9StringEncoding;
-  else if ([charset isEqualToString:@"8859-15"])
-    encoding = NSISOLatin9StringEncoding;
-#endif
-  else {
-    [self logWithFormat:@"%s: unknown charset '%@'",
-          __PRETTY_FUNCTION__, _s];
-    encoding = NSISOLatin1StringEncoding;
-  }
   return encoding;
 }
 
