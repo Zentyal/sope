@@ -1,3 +1,20 @@
+sope (2.3.8-zentyal1) trusty; urgency=medium
+
+  [ Francis Lachapelle ]
+  * [1f2615] Update ChangeLog
+  * [b76c3b] Update ChangeLog
+  * [dc3db9] Update ChangeLog
+  * [629aa1] Update ChangeLog
+
+  [ Ludovic Marcotte ]
+  * [fe0d0c] (fix) allow compilation on old gcc
+  * [28d239] (fix) avoid buffer overruns leading to empty data
+  * [f4241b] (feat) can now get IMAP folders metadata
+
+  [ Jenkins Zentyal (Zentyal GPG) ]
+
+ -- Jenkins Zentyal (Zentyal GPG) <jenkins@zentyal.com>  Mon, 22 Feb 2016 10:35:16 +0100
+
 sope (2.3.5-zentyal3) trusty; urgency=medium
 
   [ Carlos Pérez-Aradros Herce ]
