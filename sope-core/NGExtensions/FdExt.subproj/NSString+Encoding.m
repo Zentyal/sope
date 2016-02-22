@@ -49,8 +49,7 @@
 + (NSStringEncoding)stringEncodingForEncodingNamed:(NSString *)_encoding
 {
   CFStringEncoding cfEncoding;
-
-  if(_encoding == nil)
+  if (_encoding == nil)
     return 0;
 
   _encoding = [_encoding lowercaseString];
@@ -87,7 +86,10 @@
 #if GNUSTEP_BASE_LIBRARY
 
 + (NSStringEncoding)stringEncodingForEncodingNamed:(NSString *)_encoding {
-  return [GSMimeDocument encodingFromCharset:_encoding];
+    if (_encoding == nil)
+      return 0;
+
+    return [GSMimeDocument encodingFromCharset:_encoding];
 }
 
 #endif
@@ -97,7 +99,7 @@
 + (NSStringEncoding)stringEncodingForEncodingNamed:(NSString *)_encoding {
   NSString *s  = [_encoding lowercaseString];
   unsigned len = [s length];
-  
+
   if (s == nil)
     return 0;
 
@@ -105,6 +107,8 @@
   case 4:
     if ([s isEqualToString:@"utf8"])
       return NSUTF8StringEncoding;
+    if ([s isEqualToString:@"big5"]) 
+      return NSBIG5StringEncoding;
     break;
     
   case 5:
@@ -119,16 +123,76 @@
       return NSISOLatin1StringEncoding;
     if ([s isEqualToString:@"latin9"])
       return NSISOLatin9StringEncoding;
+    if ([s isEqualToString:@"utf-16"])
+      return NSUnicodeStringEncoding;
+    if ([s isEqualToString:@"8859-1"])
+      return NSISOLatin1StringEncoding;
+    if ([s isEqualToString:@"euc-kr"])
+      return NSKoreanEUCStringEncoding;
+    if ([s isEqualToString:@"koi8-r"])
+      return NSKOI8RStringEncoding;
+    if ([s isEqualToString:@"gb2312"])
+      return NSGB2312StringEncoding;
+    
+    break;
+
+  case 7:
+    if ([s isEqualToString:@"unknown"])
+      return NSISOLatin1StringEncoding;
+    if ([s isEqualToString:@"8859-15"])
+      return NSISOLatin9StringEncoding;
+
+  case 8:
+    if ([s isEqualToString:@"us-ascii"])
+      return NSASCIIStringEncoding;
+    break;
+
+  case 9:
+    if ([s isEqualToString:@"x-unknown"])
+      return NSISOLatin1StringEncoding;
     break;
 
   case 10:
     if ([s isEqualToString:@"iso-8859-1"]) 
       return NSISOLatin1StringEncoding;
+    if ([s isEqualToString:@"iso-8859-5")    
+        return NSISOCyrillicStringEncoding    
+    if ([s isEqualToString:@"iso-8859-2"])
+      return NSISOLatin2StringEncoding;
+    if ([s isEqualToString:@"iso-8859-7"])
+      return NSISOGreekStringEncoding;
+    if ([s isEqualToString:@"iso-8859-6"])
+      return NSISOArabicStringEncoding;
+    if ([s isEqualToString:@"iso-8859-4"])
+      return NSISOLatin4StringEncoding;
+    if ([s isEqualToString:@"iso-8859-9"])
+      return NSISOLatin5StringEncoding;    
     break;
     
   case 11:
     if ([s isEqualToString:@"iso-8859-15"]) 
       return NSISOLatin9StringEncoding;
+    if ([s isEqualToString:@"iso-latin-1"])
+      return NSISOLatin1StringEncoding;
+    if ([s isEqualToString:@"iso-2022-jp"])
+      return NSISO2022JPStringEncoding;
+    break;
+
+  case 12:
+    if ([s isEqualToString:@"windows-1252"])
+      return NSWindowsCP1252StringEncoding;
+    if ([s isEqualToString:@"windows-1251"])
+      return NSWindowsCP1251StringEncoding;
+    if ([s isEqualToString:@"windows-1250"])
+      return NSWindowsCP1250StringEncoding;    
+    if ([s isEqualToString:@"iso-8859-8-i"])
+      return NSISOHebrewStringEncoding;    
+    break;
+
+  case 14:
+    // unsupported but knwon
+    if ([s isEqualToString:@"ks_c_5601-1987"])
+      return NSISOLatin1StringEncoding;
     break;
   }
   
