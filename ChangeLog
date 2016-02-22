@@ -1,3 +1,84 @@
+commit dc3db91aac7b64dd059cb9854520f828efcbc593
+Author: Francis Lachapelle <flachapelle@inverse.ca>
+Date:   Mon Jan 25 11:21:37 2016 -0500
+
+    Update ChangeLog
+
+M	ChangeLog
+
+commit 28d239d0c8589b4d4ce7f49aa7d77f580c7254b7
+Author: Ludovic Marcotte <lmarcotte@inverse.ca>
+Date:   Fri Jan 22 14:22:26 2016 -0500
+
+    (fix) avoid buffer overruns leading to empty data
+
+M	sope-core/NGExtensions/NGQuotedPrintableCoding.m
+
+commit b76c3bb5eef6f976d0d21378fe9074a7d05c8dbf
+Author: Francis Lachapelle <flachapelle@inverse.ca>
+Date:   Mon Jan 18 11:25:04 2016 -0500
+
+    Update ChangeLog
+
+M	ChangeLog
+
+commit fe0d0c33452ace9aaba13c85c1e2e43d82a345af
+Author: Ludovic Marcotte <lmarcotte@inverse.ca>
+Date:   Mon Jan 18 10:14:30 2016 -0500
+
+    (fix) allow compilation on old gcc
+
+M	sope-mime/NGMime/NGMimeHeaderFieldGenerator.m
+
+commit 1f261501a0671fb1cf2ccec5d08cc49f15d0a556
+Author: Francis Lachapelle <flachapelle@inverse.ca>
+Date:   Mon Jan 18 09:57:56 2016 -0500
+
+    Update ChangeLog
+
+M	ChangeLog
+
+commit fc6e0228804ee16b0128384c886475f77d314ce6
+Author: Jesús García Sáez <jgarcia@zentyal.com>
+Date:   Mon Dec 21 17:42:01 2015 +0100
+
+    Decode QP data allows whitespace between words
+
+M	sope-mime/NGMail/NSData+MimeQP.m
+
+commit 905fda34954e378022b1a055d380c67efc04db61
+Author: Jesús García Sáez <jgarcia@zentyal.com>
+Date:   Mon Dec 21 13:16:46 2015 +0100
+
+    Refactor NGEncodeQuotedPrintableMime
+
+M	sope-mime/NGMime/NGMimeHeaderFieldGenerator.m
+
+commit 1071c335b76fa3dcdc32b62534d3d1e113b25135
+Author: Jesús García Sáez <jgarcia@zentyal.com>
+Date:   Mon Dec 21 13:16:01 2015 +0100
+
+    Add methods to qp encode strings
+
+M	sope-mime/NGMime/NGMimeHeaderFieldGenerator.h
+M	sope-mime/NGMime/NGMimeHeaderFieldGenerator.m
+
+commit f062773c49193bb09e8c4b08964f8cfeea2ab8cd
+Author: Ludovic Marcotte <lmarcotte@inverse.ca>
+Date:   Thu Jan 7 09:52:54 2016 -0500
+
+    (fix) don't consider Outlook/EAS as DAV client
+
+M	sope-appserver/NGObjWeb/WEClientCapabilities.m
+
+commit 91dec51286dcfe01701e459f5ed64f6c3e5070d3
+Author: Francis Lachapelle <flachapelle@inverse.ca>
+Date:   Tue Jan 5 14:35:59 2016 -0500
+
+    Update ChangeLog
+
+M	ChangeLog
+
 commit 1343491b3d67760c1cd89881b715a24ac633452f
 Author: Ludovic Marcotte <lmarcotte@inverse.ca>
 Date:   Tue Jan 5 13:43:35 2016 -0500
